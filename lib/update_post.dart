@@ -6,12 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
-class NewPost extends StatefulWidget {
+class UpdatePost extends StatefulWidget {
+  var postDetail;
+
+  UpdatePost({this.postDetail});
+
   @override
-  _NewPostState createState() => _NewPostState();
+  _UpdatePostState createState() => _UpdatePostState();
 }
 
-class _NewPostState extends State<NewPost> {
+class _UpdatePostState extends State<UpdatePost> {
   TextEditingController inputvalue1 = new TextEditingController();
   TextEditingController inputvalue2 = new TextEditingController();
   CollectionReference profilecollection =
@@ -21,7 +25,8 @@ class _NewPostState extends State<NewPost> {
   var downloadUrl;
   String title;
   String description;
-
+  Stream response;
+  final _formKey = GlobalKey<FormState>();
   File selectedImage;
 
   Future getImage() async {
@@ -33,7 +38,14 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-  final _formKey = GlobalKey<FormState>();
+  @override
+  void initState() {
+    super.initState();
+    inputvalue1 =
+        TextEditingController(text: widget.postDetail.data()['title']);
+    inputvalue2 =
+        TextEditingController(text: widget.postDetail.data()['description']);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +80,8 @@ class _NewPostState extends State<NewPost> {
                             selectedImage,
                             fit: BoxFit.cover,
                           )
-                        : Icon(
-                            Icons.photo_camera,
-                            size: 40,
-                          ),
+                        : Image.network(widget.postDetail.data()['image'],
+                            fit: BoxFit.cover),
                   ),
                 ),
               ),
@@ -153,12 +163,15 @@ class _NewPostState extends State<NewPost> {
                                 .child("blogImages")
                                 .child("${randomAlphaNumeric(9)}.jpg");
 
-                            var task = ref.putFile(selectedImage);
+                            var task =
+                                ref.putFile(widget.postDetail.imageFile);
 
                             task.whenComplete(() async {
                               var link = await ref.getDownloadURL();
 
-                              await profilecollection.add(
+                              await profilecollection
+                                  .doc(widget.postDetail.id)
+                                  .update(
                                 {
                                   'title': title,
                                   'description': description,
@@ -166,7 +179,7 @@ class _NewPostState extends State<NewPost> {
                                 },
                               ).then(
                                 (value) {
-                                  Navigator.pop(context, selectedImage);
+                                  Navigator.pop(context);
                                 },
                               );
                             });
@@ -175,7 +188,7 @@ class _NewPostState extends State<NewPost> {
                           }
                         },
                         child: Text(
-                          'Post',
+                          'Update',
                           style: TextStyle(fontSize: 20),
                         ),
                       ),

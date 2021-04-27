@@ -14,7 +14,7 @@ class AuthMethods {
 
     final GoogleSignInAccount googleSignInAccount =
         await _googleSignIn.signIn();
-    
+
     final GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
 
@@ -23,8 +23,7 @@ class AuthMethods {
         accessToken: googleSignInAuthentication.accessToken);
 
     try {
-      UserCredential result =
-          await _firebaseAuth.signInWithCredential(credential).then((value) {
+      await _firebaseAuth.signInWithCredential(credential).then((value) {
         Navigator.push(
           context,
           CupertinoPageRoute(
