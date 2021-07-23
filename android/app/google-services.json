@@ -1,20 +1,20 @@
 {
   "project_info": {
-    "project_number": "478372029011",
-    "project_id": "chat-app-81863",
-    "storage_bucket": "chat-app-81863.appspot.com"
+    "project_number": "809294895379",
+    "project_id": "blogpost-29284",
+    "storage_bucket": "blogpost-29284.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:478372029011:android:b81692544dc335ad5e5ca6",
+        "mobilesdk_app_id": "1:809294895379:android:eed35e436b9862962962e6",
         "android_client_info": {
           "package_name": "com.example.blogpost"
         }
       },
       "oauth_client": [
         {
-          "client_id": "478372029011-3jimm8onjplvdna54hd52803fom7kqti.apps.googleusercontent.com",
+          "client_id": "809294895379-ukh5s3dd3c1cej1cuil7cefu1rrotc3f.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.blogpost",
@@ -22,20 +22,20 @@
           }
         },
         {
-          "client_id": "478372029011-h9u9gpgi31p2fagbbbmt5pgthcq1nr5f.apps.googleusercontent.com",
+          "client_id": "809294895379-o2ah7d5bmd54fqrk9htkk3j51hcdgbio.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA8IozWl2uNAlPIHpIwttS2lW9zLJbz65M"
+          "current_key": "AIzaSyCSnSMFSYVAInztv_XnPhLyYfH3YSA6JKA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "478372029011-h9u9gpgi31p2fagbbbmt5pgthcq1nr5f.apps.googleusercontent.com",
+              "client_id": "809294895379-o2ah7d5bmd54fqrk9htkk3j51hcdgbio.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

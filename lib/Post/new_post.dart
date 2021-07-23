@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:blogpost/services/service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,8 +15,13 @@ class NewPost extends StatefulWidget {
 class _NewPostState extends State<NewPost> {
   TextEditingController inputvalue1 = new TextEditingController();
   TextEditingController inputvalue2 = new TextEditingController();
-  CollectionReference profilecollection =
-      FirebaseFirestore.instance.collection('BlogPost');
+  CollectionReference userCollection = FirebaseFirestore.instance
+      .collection('BlogPost')
+      .doc(AuthMethods().auth.currentUser.uid)
+      .collection("UserBlogs");
+
+  CollectionReference allCollection =
+      FirebaseFirestore.instance.collection("AllBlogPosts");
 
   FirebaseStorage storage = FirebaseStorage.instance;
   var downloadUrl;
@@ -158,11 +164,12 @@ class _NewPostState extends State<NewPost> {
                             task.whenComplete(() async {
                               var link = await ref.getDownloadURL();
 
-                              await profilecollection.add(
+                              await userCollection.add(
                                 {
                                   'title': title,
                                   'description': description,
-                                  'image': link
+                                  'image': link,
+                                  'createdAt': DateTime.now(),
                                 },
                               ).then(
                                 (value) {

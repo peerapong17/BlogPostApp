@@ -1,4 +1,5 @@
-import 'package:blogpost/service.dart';
+import 'package:blogpost/services/service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/cupertino.dart';
 
@@ -11,6 +12,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
