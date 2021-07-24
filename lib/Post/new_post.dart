@@ -13,15 +13,8 @@ class NewPost extends StatefulWidget {
 }
 
 class _NewPostState extends State<NewPost> {
-  TextEditingController inputvalue1 = new TextEditingController();
-  TextEditingController inputvalue2 = new TextEditingController();
-  CollectionReference userCollection = FirebaseFirestore.instance
-      .collection('BlogPost')
-      .doc(AuthMethods().auth.currentUser.uid)
-      .collection("UserBlogs");
-
-  CollectionReference allCollection =
-      FirebaseFirestore.instance.collection("AllBlogPosts");
+  CollectionReference userCollection =
+      FirebaseFirestore.instance.collection('BlogPost');
 
   FirebaseStorage storage = FirebaseStorage.instance;
   var downloadUrl;
@@ -93,7 +86,6 @@ class _NewPostState extends State<NewPost> {
                           color: Color(0xff212121),
                           borderRadius: BorderRadius.circular(20)),
                       child: TextFormField(
-                        controller: inputvalue1,
                         style: TextStyle(
                           fontSize: 25.0,
                         ),
@@ -122,7 +114,6 @@ class _NewPostState extends State<NewPost> {
                           color: Color(0xff212121),
                           borderRadius: BorderRadius.circular(20)),
                       child: TextFormField(
-                        controller: inputvalue2,
                         style: TextStyle(
                           fontSize: 25.0,
                         ),
@@ -169,6 +160,7 @@ class _NewPostState extends State<NewPost> {
                                   'title': title,
                                   'description': description,
                                   'image': link,
+                                  "userId": AuthMethods().auth.currentUser.uid,
                                   'createdAt': DateTime.now(),
                                 },
                               ).then(

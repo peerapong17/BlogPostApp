@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:blogpost/post/new_post.dart';
 import 'package:blogpost/post/update_post.dart';
 import 'package:blogpost/services/service.dart';
@@ -6,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:timeago/timeago.dart' as timeago;
 import '../home_screen.dart';
 
 class UserPost extends StatefulWidget {
@@ -39,11 +40,11 @@ class _UserPostState extends State<UserPost> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.network(AuthMethods().auth.currentUser.photoURL),
+                    Image.network(AuthMethods().auth.currentUser.photoURL != null ? AuthMethods().auth.currentUser.photoURL : ''),
                     SizedBox(
                       height: 10,
                     ),
-                    Text(AuthMethods().auth.currentUser.displayName)
+                    Text(AuthMethods().auth.currentUser.displayName != null ? AuthMethods().auth.currentUser.displayName : '')
                   ],
                 )),
             ListTile(
@@ -92,9 +93,7 @@ class _UserPostState extends State<UserPost> {
         child: StreamBuilder(
           stream: FirebaseFirestore.instance
               .collection("BlogPost")
-              .doc(AuthMethods().auth.currentUser.uid)
-              .collection("UserBlogs")
-              .orderBy("createdAt", descending: true)
+              .where("userId", isEqualTo: AuthMethods().auth.currentUser.uid)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -111,51 +110,58 @@ class _UserPostState extends State<UserPost> {
                         ),
                       );
                     },
-                    child: Container(
-                      color: Colors.blue,
-                      width: double.infinity,
-                      height: 400,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            height: 20,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Container(
+                        width: double.infinity,
+                        height: 300,
+                        decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(7.0),
                           ),
-                          Container(
-                            height: 200,
-                            width: double.infinity,
-                            child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.network(
-                                  data.data()['image'],
-                                  fit: BoxFit.contain,
-                                )),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                children: [
-                                  Text(
-                                    data.data()['title'],
-                                    style: TextStyle(fontSize: 30),
-                                  ),
-                                  Text(
-                                    data.data()['description'],
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.white.withOpacity(0.6)),
-                                  ),
-                                ],
-                              ),
-                              Text(formattedDate),
-                            ],
-                          )
-                        ],
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Container(
+                              height: 200,
+                              width: double.infinity,
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.network(
+                                    data.data()['image'],
+                                    fit: BoxFit.contain,
+                                  )),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      data.data()['title'],
+                                      style: TextStyle(fontSize: 25),
+                                    ),
+                                    Text(
+                                      data.data()['description'],
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.white.withOpacity(0.6)),
+                                    ),
+                                  ],
+                                ),
+                                Text(timeago.format(data.data()['createdAt'].toDate())),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -180,6 +186,7 @@ class _UserPostState extends State<UserPost> {
         backgroundColor: Color(0xfffff94a),
         child: Icon(Icons.add_photo_alternate_outlined),
         onPressed: () async {
+          print(AuthMethods().auth.currentUser.uid);
           await Navigator.push(
             context,
             CupertinoPageRoute(

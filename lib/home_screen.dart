@@ -8,15 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String formattedDate =
-      DateFormat('kk:mm').format(DateTime.now());
+  String formattedDate = DateFormat('kk:mm').format(DateTime.now());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,11 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.network(AuthMethods().auth.currentUser.photoURL),
+                    Image.network(AuthMethods().auth.currentUser.photoURL != null ? AuthMethods().auth.currentUser.photoURL : ''),
                     SizedBox(
                       height: 10,
                     ),
-                    Text(AuthMethods().auth.currentUser.displayName)
+                    Text(AuthMethods().auth.currentUser.displayName != null ? AuthMethods().auth.currentUser.displayName : '')
                   ],
                 )),
             ListTile(
@@ -92,9 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: StreamBuilder(
           stream: FirebaseFirestore.instance
               .collection("BlogPost")
-              .doc(AuthMethods().auth.currentUser.uid)
-              .collection("UserBlogs")
-              .orderBy("createdAt")
+              .orderBy("createdAt", descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -148,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     Text(
                                       data.data()['title'],
-                                      style: TextStyle(fontSize: 30),
+                                      style: TextStyle(fontSize: 25),
                                     ),
                                     Text(
                                       data.data()['description'],
@@ -158,7 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ],
                                 ),
-                                Text(timeago.format(data.data()['createdAt'].toDate())),
+                                Text(
+                                  timeago.format(
+                                    data.data()['createdAt'].toDate(),
+                                  ),
+                                ),
                               ],
                             ),
                           ],
