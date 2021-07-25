@@ -36,9 +36,9 @@ class _LoginPageState extends State<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         TextFormField(
-                          onSaved: (String value) {
+                          onSaved: (String? value) {
                             setState(() {
-                              email = value;
+                              email = value!;
                             });
                           },
                           validator: MultiValidator([
@@ -158,8 +158,8 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text("Login"),
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              if (_formKey.currentState.validate()) {
-                                _formKey.currentState.save();
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
                                 try {
                                   await FirebaseAuth.instance
                                       .signInWithEmailAndPassword(

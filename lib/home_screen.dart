@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'package:blogpost/Services/service.dart';
 import 'package:blogpost/UserPost/user_post.dart';
-import 'package:blogpost/post/update_post.dart';
-import 'package:blogpost/services/service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
+import 'Post/detail_post.dart';
+import 'Post/test_page.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -36,13 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.network(AuthMethods().auth.currentUser.photoURL != null ? AuthMethods().auth.currentUser.photoURL : ''),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(AuthMethods().auth.currentUser.displayName != null ? AuthMethods().auth.currentUser.displayName : '')
-                  ],
+                  children: [],
                 )),
             ListTile(
               leading: Icon(Icons.home),
@@ -69,8 +65,30 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: Icon(Icons.exit_to_app),
               trailing: Icon(Icons.arrow_forward_ios),
               title: Text('Log out'),
-              onTap: () async {
-                await AuthMethods().signOutWithGoogle(context);
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Are you sure?"),
+                      content: Text("Thank you for using our app"),
+                      actions: [
+                        TextButton(
+                          child: Text("Cancel"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text("OK"),
+                          onPressed: () async {
+                            await AuthMethods().signOutWithGoogle(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
             ),
           ],
@@ -92,18 +110,26 @@ class _HomeScreenState extends State<HomeScreen> {
               .collection("BlogPost")
               .orderBy("createdAt", descending: true)
               .snapshots(),
-          builder: (context, snapshot) {
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasData) {
               return ListView.builder(
-                itemCount: snapshot.data.docs.length,
+                itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  var data = snapshot.data.docs[index];
+                  Map<String, dynamic> data =
+                      snapshot.data!.docs[index].data() as Map<String, dynamic>;
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
-                        CupertinoPageRoute(
-                          builder: (context) => UpdatePost(postDetail: data),
+                        MaterialPageRoute(
+                          builder: (context) => DetailPost(
+                            title: data['title'],
+                            description: data['description'],
+                            image: data['image'],
+                            displayName: data['displayName'],
+                            documentId:
+                                snapshot.data!.docs[index].id.characters,
+                          ),
                         ),
                       );
                     },
@@ -126,38 +152,42 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: 200,
                               width: double.infinity,
                               child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(7),
                                   child: Image.network(
-                                    data.data()['image'],
+                                    data['image'],
                                     fit: BoxFit.cover,
                                   )),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: 17,
                             ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      data.data()['title'],
+                                      data['title'],
                                       style: TextStyle(fontSize: 25),
                                     ),
                                     Text(
-                                      data.data()['description'],
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white.withOpacity(0.6)),
+                                      timeago.format(
+                                        data['createdAt'].toDate(),
+                                      ),
+                                      style: TextStyle(color: Colors.white60),
                                     ),
                                   ],
                                 ),
+                                SizedBox(
+                                  height: 13,
+                                ),
                                 Text(
-                                  timeago.format(
-                                    data.data()['createdAt'].toDate(),
-                                  ),
+                                  data['description'].substring(0, 40),
+                                  style: TextStyle(
+                                      fontSize: 17,
+                                      color: Colors.white.withOpacity(0.6)),
                                 ),
                               ],
                             ),

@@ -1,10 +1,11 @@
 import 'dart:io';
-import 'package:blogpost/services/service.dart';
+import 'package:blogpost/Services/service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
 
 class NewPost extends StatefulWidget {
@@ -18,17 +19,16 @@ class _NewPostState extends State<NewPost> {
 
   FirebaseStorage storage = FirebaseStorage.instance;
   var downloadUrl;
-  String title;
-  String description;
+  String title = '';
+  String description = '';
 
-  File selectedImage;
+  File? selectedImage;
 
   Future getImage() async {
-    PickedFile image =
-        await ImagePicker().getImage(source: ImageSource.gallery);
+    XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
 
     setState(() {
-      selectedImage = File(image.path);
+      selectedImage = File(image!.path);
     });
   }
 
@@ -64,7 +64,7 @@ class _NewPostState extends State<NewPost> {
                         borderRadius: BorderRadius.circular(20)),
                     child: selectedImage != null
                         ? Image.file(
-                            selectedImage,
+                            selectedImage!,
                             fit: BoxFit.cover,
                           )
                         : Icon(
@@ -103,7 +103,7 @@ class _NewPostState extends State<NewPost> {
                           return null;
                         },
                         onSaved: (val) {
-                          title = val;
+                          title = val!;
                         },
                       ),
                     ),
@@ -131,7 +131,7 @@ class _NewPostState extends State<NewPost> {
                           return null;
                         },
                         onSaved: (val) {
-                          description = val;
+                          description = val!;
                         },
                       ),
                     ),
@@ -142,7 +142,7 @@ class _NewPostState extends State<NewPost> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () async {
-                          _formKey.currentState.save();
+                          _formKey.currentState!.save();
 
                           try {
                             Reference ref = storage
@@ -150,17 +150,31 @@ class _NewPostState extends State<NewPost> {
                                 .child("blogImages")
                                 .child("${randomAlphaNumeric(9)}.jpg");
 
-                            var task = ref.putFile(selectedImage);
+                            var task = ref.putFile(selectedImage!);
+                            // var titleUpperCase = title.substring(0, 1);
+                            // var titleLowerCase =
+                            //     title.substring(1, title.length);
+                            String? sentence = toBeginningOfSentenceCase(title);
 
                             task.whenComplete(() async {
                               var link = await ref.getDownloadURL();
 
                               await userCollection.add(
                                 {
-                                  'title': title,
+                                  'title': sentence,
                                   'description': description,
                                   'image': link,
-                                  "userId": AuthMethods().auth.currentUser.uid,
+                                  "displayName": AuthMethods()
+                                              .auth
+                                              .currentUser!
+                                              .displayName !=
+                                          null
+                                      ? AuthMethods()
+                                          .auth
+                                          .currentUser!
+                                          .displayName
+                                      : "Anonymous",
+                                  "userId": AuthMethods().auth.currentUser!.uid,
                                   'createdAt': DateTime.now(),
                                 },
                               ).then(

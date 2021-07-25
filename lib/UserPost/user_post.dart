@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:blogpost/Post/detail_post.dart';
+import 'package:blogpost/Post/update_post.dart';
 import 'package:blogpost/post/new_post.dart';
 import 'package:blogpost/post/update_post.dart';
 import 'package:blogpost/services/service.dart';
@@ -40,11 +42,7 @@ class _UserPostState extends State<UserPost> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.network(AuthMethods().auth.currentUser.photoURL != null ? AuthMethods().auth.currentUser.photoURL : ''),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(AuthMethods().auth.currentUser.displayName != null ? AuthMethods().auth.currentUser.displayName : '')
+                    
                   ],
                 )),
             ListTile(
@@ -93,22 +91,23 @@ class _UserPostState extends State<UserPost> {
         child: StreamBuilder(
           stream: FirebaseFirestore.instance
               .collection("BlogPost")
-              .where("userId", isEqualTo: AuthMethods().auth.currentUser.uid)
+              .where("userId", isEqualTo: AuthMethods().auth.currentUser!.uid)
               .snapshots(),
-          builder: (context, snapshot) {
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasData) {
               return ListView.builder(
-                itemCount: snapshot.data.docs.length,
+                itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  var data = snapshot.data.docs[index];
+                  Map<String, dynamic> data =
+                      snapshot.data!.docs[index].data() as Map<String, dynamic>;
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                          builder: (context) => UpdatePost(postDetail: data),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   CupertinoPageRoute(
+                      //     builder: (context) => DetailPost(),
+                      //   ),
+                      // );
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -116,9 +115,9 @@ class _UserPostState extends State<UserPost> {
                         width: double.infinity,
                         height: 300,
                         decoration: BoxDecoration(
-                            color: Colors.black12,
-                            borderRadius: BorderRadius.circular(7.0),
-                          ),
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(7.0),
+                        ),
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -130,36 +129,47 @@ class _UserPostState extends State<UserPost> {
                               height: 200,
                               width: double.infinity,
                               child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(7),
                                   child: Image.network(
-                                    data.data()['image'],
-                                    fit: BoxFit.contain,
+                                    data['image'],
+                                    fit: BoxFit.cover,
                                   )),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: 17,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      data.data()['title'],
+                                      data['title'],
                                       style: TextStyle(fontSize: 25),
                                     ),
                                     Text(
-                                      data.data()['description'],
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white.withOpacity(0.6)),
+                                      timeago.format(
+                                        data['createdAt'].toDate(),
+                                      ),
+                                      style: TextStyle(color: Colors.white60),
                                     ),
                                   ],
                                 ),
-                                Text(timeago.format(data.data()['createdAt'].toDate())),
+                                SizedBox(
+                                  height: 13,
+                                ),
+                                Text(
+                                  data['description'].substring(0, 40),
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.white.withOpacity(0.8)),
+                                ),
                               ],
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -186,7 +196,6 @@ class _UserPostState extends State<UserPost> {
         backgroundColor: Color(0xfffff94a),
         child: Icon(Icons.add_photo_alternate_outlined),
         onPressed: () async {
-          print(AuthMethods().auth.currentUser.uid);
           await Navigator.push(
             context,
             CupertinoPageRoute(

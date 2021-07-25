@@ -10,7 +10,7 @@ import 'package:form_field_validator/form_field_validator.dart';
 import '../home_screen.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key key}) : super(key: key);
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -38,9 +38,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         TextFormField(
-                          onSaved: (String value) {
+                          onSaved: (String? value) {
                             setState(() {
-                              email = value;
+                              email = value!;
                             });
                           },
                           validator: MultiValidator([
@@ -156,8 +156,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             child: Text("Register"),
                             onPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              if (_formKey.currentState.validate()) {
-                                _formKey.currentState.save();
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
                                 try {
                                   await FirebaseAuth.instance
                                       .createUserWithEmailAndPassword(
