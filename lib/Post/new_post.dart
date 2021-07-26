@@ -33,7 +33,7 @@ class _NewPostState extends State<NewPost> {
   }
 
   final _formKey = GlobalKey<FormState>();
-
+  
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -151,17 +151,13 @@ class _NewPostState extends State<NewPost> {
                                 .child("${randomAlphaNumeric(9)}.jpg");
 
                             var task = ref.putFile(selectedImage!);
-                            // var titleUpperCase = title.substring(0, 1);
-                            // var titleLowerCase =
-                            //     title.substring(1, title.length);
-                            String? sentence = toBeginningOfSentenceCase(title);
 
                             task.whenComplete(() async {
                               var link = await ref.getDownloadURL();
 
                               await userCollection.add(
                                 {
-                                  'title': sentence,
+                                  'title': toBeginningOfSentenceCase(title),
                                   'description': description,
                                   'image': link,
                                   "displayName": AuthMethods()
@@ -175,6 +171,8 @@ class _NewPostState extends State<NewPost> {
                                           .displayName
                                       : "Anonymous",
                                   "userId": AuthMethods().auth.currentUser!.uid,
+                                  "like": 0,
+                                  "disLike": 0,
                                   'createdAt': DateTime.now(),
                                 },
                               ).then(

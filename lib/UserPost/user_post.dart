@@ -1,9 +1,6 @@
 import 'dart:io';
-
-import 'package:blogpost/Post/detail_post.dart';
 import 'package:blogpost/Post/update_post.dart';
 import 'package:blogpost/post/new_post.dart';
-import 'package:blogpost/post/update_post.dart';
 import 'package:blogpost/services/service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -102,12 +99,17 @@ class _UserPostState extends State<UserPost> {
                       snapshot.data!.docs[index].data() as Map<String, dynamic>;
                   return GestureDetector(
                     onTap: () {
-                      // Navigator.push(
-                      //   context,
-                      //   CupertinoPageRoute(
-                      //     builder: (context) => DetailPost(),
-                      //   ),
-                      // );
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (context) => UpdatePost(
+                            title: data['title'],
+                            description: data['description'],
+                            image: data['image'],
+                            documentId: snapshot.data!.docs[index].id.characters
+                          ),
+                        ),
+                      );
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),

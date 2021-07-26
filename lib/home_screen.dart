@@ -127,6 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             description: data['description'],
                             image: data['image'],
                             displayName: data['displayName'],
+                            like: data['like'],
+                            disLike: data['disLike'],
                             documentId:
                                 snapshot.data!.docs[index].id.characters,
                           ),

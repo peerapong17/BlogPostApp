@@ -1,4 +1,5 @@
 import 'package:blogpost/Services/service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class DetailPost extends StatefulWidget {
@@ -7,13 +8,17 @@ class DetailPost extends StatefulWidget {
   final String image;
   final String displayName;
   final Characters documentId;
-  const DetailPost(
+  int like;
+  int disLike;
+  DetailPost(
       {Key? key,
       required this.title,
       required this.description,
       required this.image,
       required this.displayName,
-      required this.documentId})
+      required this.documentId,
+      required this.like,
+      required this.disLike})
       : super(key: key);
 
   @override
@@ -21,6 +26,8 @@ class DetailPost extends StatefulWidget {
 }
 
 class _DetailPostState extends State<DetailPost> {
+  CollectionReference blog = FirebaseFirestore.instance.collection('BlogPost');
+  bool isLIked = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,14 +83,38 @@ class _DetailPostState extends State<DetailPost> {
                       Text("By ${widget.displayName.toString()}"),
                       Row(
                         children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.thumb_up),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    isLIked = !isLIked;
+                                  });
+                                  blog
+                                      .doc(widget.documentId.toString())
+                                      .update({"like": isLIked ? widget.like += 1 : widget.like -= 1});
+                                },
+                                icon: Icon(
+                                  Icons.thumb_up,
+                                  color: isLIked ? Colors.blue : Colors.white38,
+                                ),
+                              ),
+                              Text(widget.like.toString())
+                            ],
                           ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.thumb_down),
-                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  blog
+                                      .doc(widget.documentId.toString())
+                                      .update({"disLike": widget.disLike += 1});
+                                },
+                                icon: Icon(Icons.thumb_down),
+                              ),
+                              Text(widget.disLike.toString())
+                            ],
+                          )
                         ],
                       )
                     ],
