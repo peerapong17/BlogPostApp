@@ -5,12 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:random_string/random_string.dart';
 
 class UpdatePost extends StatefulWidget {
-  String title;
-  String description;
-  String image;
+  final String title;
+  final String description;
+  final String image;
   final Characters documentId;
 
   UpdatePost(
@@ -26,7 +25,7 @@ class UpdatePost extends StatefulWidget {
 class _UpdatePostState extends State<UpdatePost> {
   TextEditingController title = new TextEditingController();
   TextEditingController description = new TextEditingController();
-  CollectionReference blog = FirebaseFirestore.instance.collection('BlogPost');
+  CollectionReference blog = FirebaseFirestore.instance.collection('BLOG');
 
   FirebaseStorage storage = FirebaseStorage.instance;
   var downloadUrl;

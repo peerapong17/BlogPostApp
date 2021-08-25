@@ -1,12 +1,13 @@
 import 'dart:io';
-import 'package:blogpost/Services/service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
+import 'Services/blog.dart';
+import 'utils/sized_box.dart';
 
 class NewPost extends StatefulWidget {
   @override
@@ -14,9 +15,7 @@ class NewPost extends StatefulWidget {
 }
 
 class _NewPostState extends State<NewPost> {
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('BlogPost');
-
+  BlogService blogService = new BlogService();
   FirebaseStorage storage = FirebaseStorage.instance;
   var downloadUrl;
   String title = '';
@@ -33,7 +32,7 @@ class _NewPostState extends State<NewPost> {
   }
 
   final _formKey = GlobalKey<FormState>();
-  
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -74,9 +73,7 @@ class _NewPostState extends State<NewPost> {
                   ),
                 ),
               ),
-              SizedBox(
-                height: 30,
-              ),
+              sizedBox(30),
               Form(
                 key: _formKey,
                 child: Column(
@@ -107,7 +104,7 @@ class _NewPostState extends State<NewPost> {
                         },
                       ),
                     ),
-                    SizedBox(height: 20),
+                    sizedBox(20),
                     Container(
                       height: height * 0.25,
                       decoration: BoxDecoration(
@@ -141,6 +138,10 @@ class _NewPostState extends State<NewPost> {
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
+                        child: Text(
+                          'Post',
+                          style: TextStyle(fontSize: 20),
+                        ),
                         onPressed: () async {
                           _formKey.currentState!.save();
 
@@ -155,29 +156,22 @@ class _NewPostState extends State<NewPost> {
                             task.whenComplete(() async {
                               var link = await ref.getDownloadURL();
 
-                              await userCollection.add(
+                              await blogService.blogCollection.add(
                                 {
                                   'title': toBeginningOfSentenceCase(title),
                                   'description': description,
                                   'image': link,
-                                  "displayName": AuthMethods()
-                                              .auth
-                                              .currentUser!
-                                              .displayName !=
-                                          null
-                                      ? AuthMethods()
-                                          .auth
-                                          .currentUser!
-                                          .displayName
-                                      : "Anonymous",
-                                  "userId": AuthMethods().auth.currentUser!.uid,
-                                  "like": 0,
-                                  "disLike": 0,
+                                  "displayName":
+                                      AuthService().currentUser!.displayName ??
+                                          "Anonymous",
+                                  "userId": AuthService().currentUser!.uid,
+                                  "like": [],
+                                  "disLike": [],
                                   'createdAt': DateTime.now(),
                                 },
                               ).then(
                                 (value) {
-                                  Navigator.pop(context, selectedImage);
+                                  Navigator.pop(context);
                                 },
                               );
                             });
@@ -185,10 +179,6 @@ class _NewPostState extends State<NewPost> {
                             print(e);
                           }
                         },
-                        child: Text(
-                          'Post',
-                          style: TextStyle(fontSize: 20),
-                        ),
                       ),
                     )
                   ],
