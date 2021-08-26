@@ -1,5 +1,6 @@
 import 'package:blogpost/Authentication/login_page.dart';
-import 'package:blogpost/Post/main_post.dart';
+import 'package:blogpost/Post/main_blog.dart';
+import 'package:blogpost/utils/show_snack.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,46 +8,44 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   User? get currentUser => auth.currentUser!;
 
-  Future register(String email, String password, BuildContext context) async {
+  Future<void> register(
+      String email, String password, BuildContext context) async {
     try {
       await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password)
-          .then(
-        (value) {
-          print(value);
-          Navigator.push(context, MaterialPageRoute(builder: (_) {
-            return HomeScreen();
-          }));
-        },
-      );
-    } on FirebaseException catch (e) {
-      print(e);
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      Navigator.push(context, MaterialPageRoute(builder: (_) {
+        return MainBlog();
+      }));
+    } on FirebaseException catch (error) {
+      showSnack(error.message, context);
     }
   }
 
-  Future signIn(String email, String password, BuildContext context) async {
+  Future<void> signIn(
+      String email, String password, BuildContext context) async {
     try {
       await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password)
-          .then(
-        (value) {
-          Navigator.push(context, MaterialPageRoute(builder: (_) {
-            return HomeScreen();
-          }));
-        },
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) {
+            return MainBlog();
+          },
+        ),
       );
-    } on FirebaseException catch (e) {
-      print(e);
+    } on FirebaseException catch (error) {
+      showSnack(error.message, context);
     }
   }
 
-  signInWithGoogle(BuildContext context) async {
-    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-    final GoogleSignIn _googleSignIn = GoogleSignIn();
-
+  Future<void> signInWithGoogle(BuildContext context) async {
     final GoogleSignInAccount? googleSignInAccount =
         await _googleSignIn.signIn();
 
@@ -58,27 +57,30 @@ class AuthService {
         accessToken: googleSignInAuthentication.accessToken);
 
     try {
-      await _firebaseAuth.signInWithCredential(credential).then((value) {
+      await auth.signInWithCredential(credential).then((value) {
         Navigator.push(
           context,
           CupertinoPageRoute(
-            builder: (context) => HomeScreen(),
+            builder: (context) => MainBlog(),
           ),
         );
       });
-    } catch (e) {
-      print(e);
+    } on FirebaseAuthException catch (error) {
+      showSnack(error.message, context);
     }
   }
 
-  signOutWithGoogle(BuildContext context) async {
-    await auth.signOut().then(
-          (value) => Navigator.push(
-            context,
-            CupertinoPageRoute(
-              builder: (context) => LoginPage(),
-            ),
-          ),
-        );
+  Future<void> signOutWithGoogle(BuildContext context) async {
+    try {
+      await auth.signOut();
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => LoginPage(),
+        ),
+      );
+    } on FirebaseAuthException catch (error) {
+      showSnack(error.message, context);
+    }
   }
 }

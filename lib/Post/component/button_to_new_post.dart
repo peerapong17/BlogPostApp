@@ -1,4 +1,4 @@
-import 'package:blogpost/Post/create_post.dart';
+import 'package:blogpost/Post/create_blog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +13,7 @@ Container buttonToNewPost(BuildContext context) {
           await Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => NewPost(),
+              builder: (context) => CreateBlog(),
             ),
           );
         },

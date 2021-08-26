@@ -1,23 +1,25 @@
 import 'dart:io';
 import 'package:blogpost/Authentication/services/auth.dart';
+import 'package:blogpost/Post/services/blog.dart';
+import 'package:blogpost/utils/show_snack.dart';
+import 'package:blogpost/utils/sized_box.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
-import 'Services/blog.dart';
-import 'utils/sized_box.dart';
+import 'component/image_uploaded_box.dart';
 
-class NewPost extends StatefulWidget {
+class CreateBlog extends StatefulWidget {
   @override
-  _NewPostState createState() => _NewPostState();
+  _CreateBlogState createState() => _CreateBlogState();
 }
 
-class _NewPostState extends State<NewPost> {
+class _CreateBlogState extends State<CreateBlog> {
   BlogService blogService = new BlogService();
+  AuthService authService = new AuthService();
   FirebaseStorage storage = FirebaseStorage.instance;
-  var downloadUrl;
+  String downloadUrl = '';
   String title = '';
   String description = '';
 
@@ -37,6 +39,7 @@ class _NewPostState extends State<NewPost> {
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+    print(authService.currentUser!.uid);
     return Scaffold(
       appBar: AppBar(title: Text('Add New Post')),
       body: SingleChildScrollView(
@@ -46,38 +49,17 @@ class _NewPostState extends State<NewPost> {
           width: width,
           child: Column(
             children: [
-              Container(
-                width: width,
-                height: height * 0.3,
-                child: InkWell(
-                  splashColor: Color(0xfffc8dfb),
-                  onTap: () {
-                    getImage();
-                  },
-                  customBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Ink(
-                    decoration: BoxDecoration(
-                        color: Color(0xff999999),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: selectedImage != null
-                        ? Image.file(
-                            selectedImage!,
-                            fit: BoxFit.cover,
-                          )
-                        : Icon(
-                            Icons.photo_camera,
-                            size: 40,
-                          ),
-                  ),
-                ),
-              ),
+              imageUploadedBox(
+                  width: width,
+                  height: height,
+                  selectedImage: selectedImage,
+                  ontap: getImage),
               sizedBox(30),
               Form(
                 key: _formKey,
                 child: Column(
                   children: <Widget>[
+                    // textField(label: "Title :", value: title),
                     Container(
                       decoration: BoxDecoration(
                           color: Color(0xff212121),
@@ -122,7 +104,7 @@ class _NewPostState extends State<NewPost> {
                           labelStyle: TextStyle(fontSize: 20),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          if (value == null || value.trim().isEmpty) {
                             return 'Please enter some text';
                           }
                           return null;
@@ -132,9 +114,7 @@ class _NewPostState extends State<NewPost> {
                         },
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                    sizedBox(10),
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -143,40 +123,43 @@ class _NewPostState extends State<NewPost> {
                           style: TextStyle(fontSize: 20),
                         ),
                         onPressed: () async {
-                          _formKey.currentState!.save();
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
 
-                          try {
-                            Reference ref = storage
-                                .ref()
-                                .child("blogImages")
-                                .child("${randomAlphaNumeric(9)}.jpg");
+                            if (selectedImage == null) {
+                              showSnack(
+                                  "Image is not provided, please choose some",
+                                  context);
+                              return;
+                            }
 
-                            var task = ref.putFile(selectedImage!);
+                            try {
+                              Reference ref = storage
+                                  .ref()
+                                  .child("blog")
+                                  .child("images")
+                                  .child("${randomAlphaNumeric(9)}.jpg");
 
-                            task.whenComplete(() async {
-                              var link = await ref.getDownloadURL();
+                              UploadTask task = ref.putFile(selectedImage!);
 
-                              await blogService.blogCollection.add(
-                                {
-                                  'title': toBeginningOfSentenceCase(title),
-                                  'description': description,
-                                  'image': link,
-                                  "displayName":
-                                      AuthService().currentUser!.displayName ??
-                                          "Anonymous",
-                                  "userId": AuthService().currentUser!.uid,
-                                  "like": [],
-                                  "disLike": [],
-                                  'createdAt': DateTime.now(),
-                                },
-                              ).then(
-                                (value) {
+                              task.whenComplete(
+                                () async {
+                                  String imageUrl = await ref.getDownloadURL();
+                                  blogService.addBlog(
+                                      title: toBeginningOfSentenceCase(title)!,
+                                      description: description,
+                                      displayName:
+                                          authService.currentUser!.displayName,
+                                      imageUrl: imageUrl,
+                                      userId: authService.currentUser!.uid,
+                                      context: context);
+
                                   Navigator.pop(context);
                                 },
                               );
-                            });
-                          } catch (e) {
-                            print(e);
+                            } on FirebaseException catch (error) {
+                              showSnack(error.message, context);
+                            }
                           }
                         },
                       ),

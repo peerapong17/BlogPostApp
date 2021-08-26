@@ -1,11 +1,11 @@
 import 'package:blogpost/Authentication/services/auth.dart';
+import 'package:blogpost/Post/services/blog.dart';
+import 'package:blogpost/utils/sized_box.dart';
 import 'package:flutter/material.dart';
-import 'Services/blog.dart';
 import 'component/image_box.dart';
 import 'component/like_row.dart';
-import 'utils/sized_box.dart';
 
-class PostDetail extends StatefulWidget {
+class BlogDetail extends StatefulWidget {
   final String title;
   final String description;
   final String image;
@@ -13,7 +13,7 @@ class PostDetail extends StatefulWidget {
   final Characters documentId;
   final List<dynamic> like;
   final List<dynamic> disLike;
-  PostDetail(
+  BlogDetail(
       {Key? key,
       required this.title,
       required this.description,
@@ -25,10 +25,10 @@ class PostDetail extends StatefulWidget {
       : super(key: key);
 
   @override
-  _PostDetailState createState() => _PostDetailState();
+  _BlogDetailState createState() => _BlogDetailState();
 }
 
-class _PostDetailState extends State<PostDetail> {
+class _BlogDetailState extends State<BlogDetail> {
   AuthService authService = new AuthService();
   BlogService blogService = new BlogService();
   bool isLiked = false;
@@ -79,8 +79,16 @@ class _PostDetailState extends State<PostDetail> {
                         isLiked,
                         Icons.thumb_up,
                         widget.like,
-                        () => blogService.addLike(isLiked, "like",
-                            authService.currentUser!.uid, widget.documentId),
+                        () {
+                          blogService.addLike(
+                              isLiked: isLiked,
+                              field: "like",
+                              uid: authService.currentUser!.uid,
+                              docId: widget.documentId,
+                              context: context);
+                          isLiked = !isLiked;
+                          setState(() {});
+                        },
                       ),
                     ],
                   ),
@@ -92,8 +100,6 @@ class _PostDetailState extends State<PostDetail> {
       ),
     );
   }
-
-  
 }
 
 // Future addLikeOrDislike(bool isliked, String field,String uid) async {

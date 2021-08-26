@@ -1,10 +1,9 @@
-import 'package:blogpost/Post/component/dialog.dart';
 import 'package:blogpost/Post/component/drawer_list.dart';
-import 'package:blogpost/Post/user_post.dart';
+import 'package:blogpost/Post/user_blog.dart';
+import 'package:blogpost/utils/show_alert.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../main_post.dart';
-
+import '../main_blog.dart';
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({
@@ -28,42 +27,31 @@ class MainDrawer extends StatelessWidget {
           drawerList(
             Icons.home,
             "Home",
-            () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                  builder: (_) {
-                    return HomeScreen();
-                  },
-                ),
-              );
-            },
+            () => Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (_) {
+                  return MainBlog();
+                },
+              ),
+            ),
           ),
           drawerList(
             Icons.person,
             "You post",
-            () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                  builder: (_) {
-                    return UserPost();
-                  },
-                ),
-              );
-            },
+            () => Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (_) {
+                  return UserBlog();
+                },
+              ),
+            ),
           ),
           drawerList(
             Icons.exit_to_app,
             "Log out",
-            () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return alertDialog(context);
-                },
-              );
-            },
+            () => showAlert(context)
           ),
         ],
       ),

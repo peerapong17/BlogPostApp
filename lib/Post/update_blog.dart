@@ -1,15 +1,20 @@
 import 'dart:io';
+import 'package:blogpost/Post/services/blog.dart';
+import 'package:blogpost/Post/user_blog.dart';
+import 'package:blogpost/utils/show_snack.dart';
+import 'package:blogpost/utils/sized_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:random_string/random_string.dart';
 
 class UpdatePost extends StatefulWidget {
   final String title;
   final String description;
-  final String image;
+  final String? image;
   final Characters documentId;
 
   UpdatePost(
@@ -25,11 +30,12 @@ class UpdatePost extends StatefulWidget {
 class _UpdatePostState extends State<UpdatePost> {
   TextEditingController title = new TextEditingController();
   TextEditingController description = new TextEditingController();
+  BlogService blogService = new BlogService();
   CollectionReference blog = FirebaseFirestore.instance.collection('BLOG');
 
   FirebaseStorage storage = FirebaseStorage.instance;
-  var downloadUrl;
-  final _formKey = GlobalKey<FormState>();
+  String downloadUrl = '';
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   File? selectedImage;
 
   Future getImage() async {
@@ -52,7 +58,7 @@ class _UpdatePostState extends State<UpdatePost> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(title: Text('Add New Post')),
+      appBar: AppBar(title: Text('Update Post')),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(20),
@@ -65,9 +71,7 @@ class _UpdatePostState extends State<UpdatePost> {
                 height: height * 0.3,
                 child: InkWell(
                   splashColor: Color(0xfffc8dfb),
-                  onTap: () {
-                    getImage();
-                  },
+                  onTap: getImage,
                   customBorder: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -80,13 +84,14 @@ class _UpdatePostState extends State<UpdatePost> {
                             selectedImage!,
                             fit: BoxFit.cover,
                           )
-                        : Image.network(widget.image, fit: BoxFit.cover),
+                        : widget.image != null
+                            ? Image.network(widget.image!, fit: BoxFit.cover)
+                            : Image.asset("assets/images/NoImageFound.jpg.png",
+                                fit: BoxFit.cover),
                   ),
                 ),
               ),
-              SizedBox(
-                height: 30,
-              ),
+              sizedBox(30),
               Form(
                 key: _formKey,
                 child: Column(
@@ -118,7 +123,7 @@ class _UpdatePostState extends State<UpdatePost> {
                         },
                       ),
                     ),
-                    SizedBox(height: 20),
+                    sizedBox(20),
                     Container(
                       height: height * 0.25,
                       decoration: BoxDecoration(
@@ -153,38 +158,86 @@ class _UpdatePostState extends State<UpdatePost> {
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () async {
-                          _formKey.currentState!.save();
-
-                          try {
-                            // Reference ref = storage
-                            //     .ref()
-                            //     .child("blogImages")
-                            //     .child("${randomAlphaNumeric(9)}.jpg");
-
-                            // var task = ref.putFile(widget.postDetail.imageFile);
-
-                            // task.whenComplete(() async {
-                            //   var link = await ref.getDownloadURL();
-
-                            await blog.doc(widget.documentId.toString()).update(
-                              {
-                                'title': toBeginningOfSentenceCase(title.text),
-                                'description': description.text
-                              },
-                            ).then(
-                              (value) {
-                                Navigator.pop(context);
-                              },
-                            );
-                          } catch (e) {
-                            print(e);
-                          }
-                        },
                         child: Text(
                           'Update',
                           style: TextStyle(fontSize: 20),
                         ),
+                        onPressed: () async {
+                          _formKey.currentState!.save();
+
+                          try {
+                            if (selectedImage != null) {
+                              Reference ref = storage
+                                  .ref()
+                                  .child("blog")
+                                  .child("images")
+                                  .child("${randomAlphaNumeric(9)}.jpg");
+
+                              UploadTask task = ref.putFile(selectedImage!);
+
+                              task.whenComplete(
+                                () async {
+                                  String imageUrl = await ref.getDownloadURL();
+
+                                  await blogService.blogCollection
+                                      .doc(widget.documentId.toString())
+                                      .update(
+                                    {
+                                      'title':
+                                          toBeginningOfSentenceCase(title.text),
+                                      'description': description.text,
+                                      'imageUrl': imageUrl
+                                    },
+                                  );
+                                },
+                              );
+                              if (widget.image != null) {
+                                storage.refFromURL(widget.image!).delete();
+                              }
+                            } else {
+                              await blogService.blogCollection
+                                  .doc(widget.documentId.toString())
+                                  .update(
+                                {
+                                  'title':
+                                      toBeginningOfSentenceCase(title.text),
+                                  'description': description.text,
+                                },
+                              );
+                            }
+                            Navigator.pop(context);
+                          } on FirebaseException catch (error) {
+                            showSnack(error.message, context);
+                          }
+                        },
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      color: Colors.redAccent,
+                      child: ElevatedButton(
+                        child: Text(
+                          'Delete',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        onPressed: () async {
+                          _formKey.currentState!.save();
+
+                          try {
+                            await blogService.deleteBlog(
+                                docId: widget.documentId, context: context);
+
+                            if (widget.image != null) {
+                              storage.refFromURL(widget.image!).delete();
+                            }
+
+                            Navigator.pop(context);
+
+                            Navigator.pop(context);
+                          } on FirebaseException catch (error) {
+                            showSnack(error.message, context);
+                          }
+                        },
                       ),
                     )
                   ],

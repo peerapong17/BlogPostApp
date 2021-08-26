@@ -2,7 +2,7 @@ import 'package:blogpost/Authentication/component/reuseButton.dart';
 import 'package:blogpost/Authentication/login_page.dart';
 import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:blogpost/Authentication/utils/input_decoration.dart';
-import 'package:blogpost/Post/utils/sized_box.dart';
+import 'package:blogpost/utils/sized_box.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -15,7 +15,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   AuthService authService = new AuthService();
   String email = '';
   String password = '';
@@ -86,10 +86,14 @@ class _RegisterPageState extends State<RegisterPage> {
                           text: "Login",
                           color: Colors.blueAccent,
                           function: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (_) {
-                              return LoginPage();
-                            }));
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) {
+                                  return LoginPage();
+                                },
+                              ),
+                            );
                           },
                         )
                       ],

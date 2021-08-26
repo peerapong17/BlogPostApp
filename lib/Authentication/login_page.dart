@@ -1,6 +1,6 @@
 import 'package:blogpost/Authentication/register_page.dart';
 import 'package:blogpost/Authentication/services/auth.dart';
-import 'package:blogpost/Post/utils/sized_box.dart';
+import 'package:blogpost/utils/sized_box.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_list.dart';

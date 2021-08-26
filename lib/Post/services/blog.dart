@@ -1,19 +1,65 @@
+import 'package:blogpost/utils/show_snack.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class BlogService {
-  CollectionReference _blog = FirebaseFirestore.instance.collection('BLOG');
+  CollectionReference blogCollection =
+      FirebaseFirestore.instance.collection('blogs');
 
-  CollectionReference get blogCollection => _blog;
+  Future<void> addBlog(
+      {required String title,
+      required String description,
+      required String imageUrl,
+      String? displayName,
+      required String userId,
+      required BuildContext context}) async {
+    try {
+      await blogCollection.add(
+        {
+          'title': title,
+          'description': description,
+          'imageUrl': imageUrl,
+          "displayName": displayName ?? "Anonymous",
+          "userId": userId,
+          "like": [],
+          "disLike": [],
+          'createdAt': DateTime.now(),
+        },
+      );
+    } on FirebaseException catch (error) {
+      showSnack(error.message, context);
+    }
+  }
 
   Future<void> addLike(
-      bool isLiked, String field, String uid, Characters docId) async {
-    isLiked
-        ? await blogCollection.doc(docId.toString()).update({
-            field: FieldValue.arrayRemove([uid])
-          })
-        : await blogCollection.doc(docId.toString()).update({
-            field: FieldValue.arrayUnion([uid])
-          });
+      {required bool isLiked,
+      required String field,
+      required String uid,
+      required Characters docId,
+      required BuildContext context}) async {
+    try {
+      isLiked
+          ? await blogCollection.doc(docId.toString()).update(
+              {
+                field: FieldValue.arrayRemove([uid])
+              },
+            )
+          : await blogCollection.doc(docId.toString()).update(
+              {
+                field: FieldValue.arrayUnion([uid])
+              },
+            );
+    } on FirebaseException catch (error) {
+      showSnack(error.message, context);
+    }
+  }
+
+  Future<void> deleteBlog(
+      {required Characters docId, required BuildContext context}) async {
+    try {
+      await blogCollection.doc(docId.toString()).delete();
+    } on FirebaseException catch (error) {
+      showSnack(error.message, context);
+    }
   }
 }
