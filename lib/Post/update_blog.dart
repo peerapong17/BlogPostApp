@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:blogpost/Post/services/blog.dart';
-import 'package:blogpost/Post/user_blog.dart';
 import 'package:blogpost/utils/show_snack.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -166,7 +165,9 @@ class _UpdatePostState extends State<UpdatePost> {
                           _formKey.currentState!.save();
 
                           try {
-                            if (selectedImage != null) {
+                            if (selectedImage != null &&
+                                title.text.trim() != '' &&
+                                description.text.trim() != '') {
                               Reference ref = storage
                                   .ref()
                                   .child("blog")
@@ -179,31 +180,23 @@ class _UpdatePostState extends State<UpdatePost> {
                                 () async {
                                   String imageUrl = await ref.getDownloadURL();
 
-                                  await blogService.blogCollection
-                                      .doc(widget.documentId.toString())
-                                      .update(
-                                    {
-                                      'title':
-                                          toBeginningOfSentenceCase(title.text),
-                                      'description': description.text,
-                                      'imageUrl': imageUrl
-                                    },
-                                  );
+                                  await blogService.updateBlog(
+                                      docId: widget.documentId,
+                                      context: context,
+                                      title: title.text,
+                                      description: description.text,
+                                      imageUrl: imageUrl);
                                 },
                               );
                               if (widget.image != null) {
                                 storage.refFromURL(widget.image!).delete();
                               }
                             } else {
-                              await blogService.blogCollection
-                                  .doc(widget.documentId.toString())
-                                  .update(
-                                {
-                                  'title':
-                                      toBeginningOfSentenceCase(title.text),
-                                  'description': description.text,
-                                },
-                              );
+                              await blogService.updateBlog(
+                                  docId: widget.documentId,
+                                  context: context,
+                                  title: title.text,
+                                  description: description.text);
                             }
                             Navigator.pop(context);
                           } on FirebaseException catch (error) {

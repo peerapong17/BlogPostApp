@@ -16,6 +16,12 @@ class MainBlog extends StatefulWidget {
 class _MainBlogState extends State<MainBlog> {
   BlogService blogService = new BlogService();
   String formattedDate = DateFormat('kk:mm').format(DateTime.now());
+
+  test() {
+    print('dsa');
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +53,7 @@ class _MainBlogState extends State<MainBlog> {
                 itemBuilder: (context, index) {
                   Map<String, dynamic> data =
                       snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                  print(data['comments']);
                   return GestureDetector(
                     child: blogCard(data),
                     onTap: () {
@@ -58,10 +65,12 @@ class _MainBlogState extends State<MainBlog> {
                             description: data['description'],
                             image: data['imageUrl'],
                             displayName: data['displayName'],
+                            comments: data['comments'],
                             like: data['like'],
                             disLike: data['disLike'],
                             documentId:
                                 snapshot.data!.docs[index].id.characters,
+                            test: () => test(),
                           ),
                         ),
                       );

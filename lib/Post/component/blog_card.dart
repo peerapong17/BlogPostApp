@@ -61,7 +61,7 @@ Padding blogCard(Map<String, dynamic> data) {
               ),
               Text(
                 data['description'] != null
-                    ? data['description']
+                    ? data['description'].toString(0, 100)
                     : "No description",
                 style: TextStyle(
                     fontSize: 17, color: Colors.white.withOpacity(0.6)),

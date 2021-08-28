@@ -1,12 +1,14 @@
+import 'package:blogpost/Post/update_blog.dart';
 import 'package:blogpost/utils/show_snack.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BlogService {
   CollectionReference blogCollection =
       FirebaseFirestore.instance.collection('blogs');
 
-  Future<void> addBlog(
+  Future<void> createBlog(
       {required String title,
       required String description,
       required String imageUrl,
@@ -26,6 +28,32 @@ class BlogService {
           'createdAt': DateTime.now(),
         },
       );
+    } on FirebaseException catch (error) {
+      showSnack(error.message, context);
+    }
+  }
+
+  Future<void> updateBlog(
+      {required Characters docId,
+      required BuildContext context,
+      required String title,
+      required String description,
+      String? imageUrl}) async {
+    try {
+      imageUrl != null
+          ? blogCollection.doc(docId.toString()).update(
+              {
+                'title': toBeginningOfSentenceCase(title),
+                'description': description,
+                'imageUrl': imageUrl
+              },
+            )
+          : blogCollection.doc(docId.toString()).update(
+              {
+                'title': toBeginningOfSentenceCase(title),
+                'description': description,
+              },
+            );
     } on FirebaseException catch (error) {
       showSnack(error.message, context);
     }

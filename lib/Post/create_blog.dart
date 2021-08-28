@@ -145,7 +145,7 @@ class _CreateBlogState extends State<CreateBlog> {
                               task.whenComplete(
                                 () async {
                                   String imageUrl = await ref.getDownloadURL();
-                                  blogService.addBlog(
+                                  blogService.createBlog(
                                       title: toBeginningOfSentenceCase(title)!,
                                       description: description,
                                       displayName:
