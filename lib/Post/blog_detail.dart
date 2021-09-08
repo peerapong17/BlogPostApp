@@ -4,9 +4,10 @@ import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'component/comment_card.dart';
-import 'component/image_box.dart';
-import 'component/like_row.dart';
+
+import 'components/comment_card.dart';
+import 'components/image_box.dart';
+import 'components/like_row.dart';
 
 class BlogDetail extends StatefulWidget {
   final String title;
@@ -17,19 +18,17 @@ class BlogDetail extends StatefulWidget {
   final List<dynamic> comments;
   final List<dynamic> like;
   final List<dynamic> disLike;
-  final Function() test;
-  BlogDetail(
-      {Key? key,
-      required this.title,
-      required this.description,
-      required this.image,
-      required this.displayName,
-      required this.documentId,
-      required this.comments,
-      required this.like,
-      required this.disLike,
-      required this.test})
-      : super(key: key);
+  BlogDetail({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.image,
+    required this.displayName,
+    required this.documentId,
+    required this.comments,
+    required this.like,
+    required this.disLike,
+  }) : super(key: key);
 
   @override
   _BlogDetailState createState() => _BlogDetailState();

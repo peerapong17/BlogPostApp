@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
-import 'component/image_uploaded_box.dart';
+
+import 'components/image_uploaded_box.dart';
+import 'models/categories.dart';
 
 class CreateBlog extends StatefulWidget {
   @override
@@ -22,7 +24,7 @@ class _CreateBlogState extends State<CreateBlog> {
   String downloadUrl = '';
   String title = '';
   String description = '';
-
+  String _currentSelectedValue = '';
   File? selectedImage;
 
   Future getImage() async {
@@ -37,12 +39,12 @@ class _CreateBlogState extends State<CreateBlog> {
 
   @override
   Widget build(BuildContext context) {
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
-    print(authService.currentUser!.uid);
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(title: Text('Add New Post')),
       body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Container(
           padding: EdgeInsets.all(20),
           height: height,
@@ -58,8 +60,8 @@ class _CreateBlogState extends State<CreateBlog> {
               Form(
                 key: _formKey,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    // textField(label: "Title :", value: title),
                     Container(
                       decoration: BoxDecoration(
                           color: Color(0xff212121),
@@ -114,12 +116,26 @@ class _CreateBlogState extends State<CreateBlog> {
                         },
                       ),
                     ),
+                    DropdownButton<String>(
+                      items: categories.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      value: "Travel",
+                      onChanged: (String? value) {
+                        setState(() {
+                          _currentSelectedValue = value!;
+                        });
+                      },
+                    ),
                     sizedBox(10),
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
                         child: Text(
-                          'Post',
+                          'Create',
                           style: TextStyle(fontSize: 20),
                         ),
                         onPressed: () async {
@@ -148,8 +164,10 @@ class _CreateBlogState extends State<CreateBlog> {
                                   blogService.createBlog(
                                       title: toBeginningOfSentenceCase(title)!,
                                       description: description,
-                                      displayName:
-                                          authService.currentUser!.displayName,
+                                      category: _currentSelectedValue,
+                                      displayName: authService
+                                              .currentUser!.displayName ??
+                                          "Anonymous",
                                       imageUrl: imageUrl,
                                       userId: authService.currentUser!.uid,
                                       context: context);

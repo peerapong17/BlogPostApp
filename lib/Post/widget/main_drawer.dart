@@ -1,4 +1,4 @@
-import 'package:blogpost/Post/component/drawer_list.dart';
+import 'package:blogpost/Post/components/drawer_list.dart';
 import 'package:blogpost/Post/user_blog.dart';
 import 'package:blogpost/utils/show_alert.dart';
 import 'package:flutter/cupertino.dart';

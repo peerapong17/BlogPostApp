@@ -1,4 +1,3 @@
-import 'package:blogpost/Post/update_blog.dart';
 import 'package:blogpost/utils/show_snack.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +10,9 @@ class BlogService {
   Future<void> createBlog(
       {required String title,
       required String description,
+      required String category,
       required String imageUrl,
-      String? displayName,
+      required String displayName,
       required String userId,
       required BuildContext context}) async {
     try {
@@ -20,11 +20,13 @@ class BlogService {
         {
           'title': title,
           'description': description,
+          'category': category,
           'imageUrl': imageUrl,
-          "displayName": displayName ?? "Anonymous",
-          "userId": userId,
-          "like": [],
-          "disLike": [],
+          'displayName': displayName,
+          'userId': userId,
+          'like': [],
+          'disLike': [],
+          'comments': [],
           'createdAt': DateTime.now(),
         },
       );
