@@ -1,16 +1,16 @@
 import 'dart:io';
 import 'package:blogpost/Authentication/services/auth.dart';
+import 'package:blogpost/Post/components/image_uploaded_box.dart';
+import 'package:blogpost/Post/models/categories.dart';
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/utils/show_snack.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
-
-import 'components/image_uploaded_box.dart';
-import 'models/categories.dart';
 
 class CreateBlog extends StatefulWidget {
   @override
@@ -77,12 +77,13 @@ class _CreateBlogState extends State<CreateBlog> {
                           labelText: "Title : ",
                           labelStyle: TextStyle(fontSize: 20),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter some text';
-                          }
-                          return null;
-                        },
+                        validator: MultiValidator([
+                          RequiredValidator(
+                              errorText: "Please enter some text"),
+                          MinLengthValidator(6,
+                              errorText:
+                                  "Title should be at least 6 characters long")
+                        ]),
                         onSaved: (val) {
                           title = val!;
                         },
@@ -105,12 +106,13 @@ class _CreateBlogState extends State<CreateBlog> {
                           labelText: "Desscription : ",
                           labelStyle: TextStyle(fontSize: 20),
                         ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter some text';
-                          }
-                          return null;
-                        },
+                        validator: MultiValidator([
+                          RequiredValidator(
+                              errorText: "Please enter some text"),
+                          MinLengthValidator(20,
+                              errorText:
+                                  "Content should be at least 20 chracters long")
+                        ]),
                         onSaved: (val) {
                           description = val!;
                         },

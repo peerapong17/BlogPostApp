@@ -1,13 +1,13 @@
+import 'package:blogpost/Post/components/app_bar.dart';
+import 'package:blogpost/Post/components/blog_card.dart';
+import 'package:blogpost/Post/models/categories.dart';
+import 'package:blogpost/Post/services/blog.dart';
+import 'package:blogpost/Post/widget/main_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'Services/blog.dart';
 import 'blog_detail.dart';
-import 'components/app_bar.dart';
-import 'components/blog_card.dart';
-import 'models/categories.dart';
-import 'widget/main_drawer.dart';
 
 class MainBlog extends StatefulWidget {
   @override
@@ -19,6 +19,15 @@ class _MainBlogState extends State<MainBlog> {
   BlogService blogService = new BlogService();
   String formattedDate = DateFormat('kk:mm').format(DateTime.now());
 
+  Stream<QuerySnapshot> fetchData(String filter) {
+    return filter == ''
+        ? blogService.blogCollection
+            .orderBy("createdAt", descending: true)
+            .snapshots()
+        : blogService.blogCollection
+            .where("category", isEqualTo: filter)
+            .snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +35,11 @@ class _MainBlogState extends State<MainBlog> {
       appBar: appBar(),
       drawer: MainDrawer(),
       body: RefreshIndicator(
-        onRefresh: () {
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (a, b, c) => MainBlog(),
-              transitionDuration: Duration(seconds: 20),
-            ),
+        onRefresh: () async {
+          await Future.delayed(
+            Duration(seconds: 3),
           );
-          return Future.value(false);
+          fetchData(blogFilteredByCategory);
         },
         child: Column(
           children: [
@@ -78,14 +83,8 @@ class _MainBlogState extends State<MainBlog> {
               ),
             ),
             Expanded(
-              child: StreamBuilder(
-                stream: blogFilteredByCategory == ""
-                    ? blogService.blogCollection
-                        .orderBy("createdAt", descending: true)
-                        .snapshots()
-                    : blogService.blogCollection
-                        .where("category", isEqualTo: blogFilteredByCategory)
-                        .snapshots(),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: fetchData(blogFilteredByCategory),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (!snapshot.hasData) {
                     return Center(

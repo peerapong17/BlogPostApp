@@ -1,14 +1,13 @@
-import 'package:blogpost/Authentication/register_page.dart';
+import 'package:blogpost/Authentication/component/reuseButton.dart';
+import 'package:blogpost/Authentication/screens/register_page.dart';
 import 'package:blogpost/Authentication/services/auth.dart';
+import 'package:blogpost/Authentication/utils/input_decoration.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_list.dart';
 import 'package:flutter_signin_button/button_view.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-
-import 'utils/input_decoration.dart';
-import 'component/reuseButton.dart';
 
 class LoginPage extends StatefulWidget {
   @override

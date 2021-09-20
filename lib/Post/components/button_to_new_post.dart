@@ -1,4 +1,4 @@
-import 'package:blogpost/Post/create_blog.dart';
+import 'package:blogpost/Post/screens/create_blog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

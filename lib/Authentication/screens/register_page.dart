@@ -1,11 +1,12 @@
 import 'package:blogpost/Authentication/component/reuseButton.dart';
-import 'package:blogpost/Authentication/login_page.dart';
 import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:blogpost/Authentication/utils/input_decoration.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);

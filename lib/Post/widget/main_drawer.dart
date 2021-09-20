@@ -1,9 +1,9 @@
 import 'package:blogpost/Post/components/drawer_list.dart';
-import 'package:blogpost/Post/user_blog.dart';
+import 'package:blogpost/Post/screens/main_blog.dart';
+import 'package:blogpost/Post/screens/user_blog.dart';
 import 'package:blogpost/utils/show_alert.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../main_blog.dart';
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({

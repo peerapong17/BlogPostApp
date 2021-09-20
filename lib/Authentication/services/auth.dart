@@ -1,5 +1,5 @@
-import 'package:blogpost/Authentication/login_page.dart';
-import 'package:blogpost/Post/main_blog.dart';
+import 'package:blogpost/Authentication/screens/login_page.dart';
+import 'package:blogpost/Post/screens/main_blog.dart';
 import 'package:blogpost/utils/show_snack.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';

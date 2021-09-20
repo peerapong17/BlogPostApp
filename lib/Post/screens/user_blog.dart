@@ -1,15 +1,15 @@
 import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:blogpost/Post/Services/blog.dart';
-import 'package:blogpost/Post/update_blog.dart';
+import 'package:blogpost/Post/components/app_bar.dart';
+import 'package:blogpost/Post/components/blog_card.dart';
+import 'package:blogpost/Post/components/button_to_new_post.dart';
+import 'package:blogpost/Post/models/categories.dart';
+import 'package:blogpost/Post/screens/update_blog.dart';
 import 'package:blogpost/Post/widget/main_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'components/app_bar.dart';
-import 'components/blog_card.dart';
-import 'components/button_to_new_post.dart';
-import 'models/categories.dart';
 
 class UserBlog extends StatefulWidget {
   @override
@@ -30,15 +30,11 @@ class _UserBlogState extends State<UserBlog> {
       drawer: MainDrawer(),
       floatingActionButton: buttonToNewPost(context),
       body: RefreshIndicator(
-        onRefresh: () {
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (a, b, c) => UserBlog(),
-              transitionDuration: Duration(seconds: 20),
-            ),
+        onRefresh: () async {
+          await Future.delayed(
+            Duration(seconds: 3),
           );
-          return Future.value(false);
+          setState(() {});
         },
         child: Column(
           children: [
