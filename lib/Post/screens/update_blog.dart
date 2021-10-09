@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:blogpost/Post/services/blog.dart';
+import 'package:blogpost/Post/services/storage.dart';
 import 'package:blogpost/utils/show_snack.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,34 +8,31 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-import 'package:random_string/random_string.dart';
 
 class UpdatePost extends StatefulWidget {
   final String title;
   final String description;
   final String? image;
-  final Characters documentId;
+  final String docId;
 
   UpdatePost(
       {required this.title,
       required this.description,
       required this.image,
-      required this.documentId});
+      required this.docId});
 
   @override
   _UpdatePostState createState() => _UpdatePostState();
 }
 
 class _UpdatePostState extends State<UpdatePost> {
-  TextEditingController title = new TextEditingController();
-  TextEditingController description = new TextEditingController();
+  Storage storageService = new Storage();
   BlogService blogService = new BlogService();
-  CollectionReference blog = FirebaseFirestore.instance.collection('BLOG');
-
-  FirebaseStorage storage = FirebaseStorage.instance;
-  String downloadUrl = '';
+  TextEditingController title = new TextEditingController();
+  TextEditingController desc = new TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  String downloadUrl = '';
   File? selectedImage;
 
   Future getImage() async {
@@ -49,7 +47,7 @@ class _UpdatePostState extends State<UpdatePost> {
   void initState() {
     super.initState();
     title = TextEditingController(text: widget.title);
-    description = TextEditingController(text: widget.description);
+    desc = TextEditingController(text: widget.description);
   }
 
   @override
@@ -84,9 +82,14 @@ class _UpdatePostState extends State<UpdatePost> {
                             fit: BoxFit.cover,
                           )
                         : widget.image != null
-                            ? Image.network(widget.image!, fit: BoxFit.cover)
-                            : Image.asset("assets/images/NoImageFound.jpg.png",
-                                fit: BoxFit.cover),
+                            ? Image.network(
+                                widget.image!,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.asset(
+                                "assets/images/NoImageFound.jpg.png",
+                                fit: BoxFit.cover,
+                              ),
                   ),
                 ),
               ),
@@ -129,7 +132,7 @@ class _UpdatePostState extends State<UpdatePost> {
                           color: Color(0xff212121),
                           borderRadius: BorderRadius.circular(20)),
                       child: TextFormField(
-                        controller: description,
+                        controller: desc,
                         style: TextStyle(
                           fontSize: 25.0,
                         ),
@@ -147,7 +150,7 @@ class _UpdatePostState extends State<UpdatePost> {
                           return null;
                         },
                         onSaved: (String? val) {
-                          description.text = val!;
+                          desc.text = val!;
                         },
                       ),
                     ),
@@ -167,36 +170,37 @@ class _UpdatePostState extends State<UpdatePost> {
                           try {
                             if (selectedImage != null &&
                                 title.text.trim() != '' &&
-                                description.text.trim() != '') {
-                              Reference ref = storage
-                                  .ref()
-                                  .child("blog")
-                                  .child("images")
-                                  .child("${randomAlphaNumeric(9)}.jpg");
+                                desc.text.trim() != '') {
 
-                              UploadTask task = ref.putFile(selectedImage!);
-
-                              task.whenComplete(
+                              storageService
+                                  .uploadImage(imageFile: selectedImage!)
+                                  .whenComplete(
                                 () async {
-                                  String imageUrl = await ref.getDownloadURL();
-
+                                  String imageUrl =
+                                      await storageService.ref.getDownloadURL();
                                   await blogService.updateBlog(
-                                      docId: widget.documentId,
-                                      context: context,
-                                      title: title.text,
-                                      description: description.text,
-                                      imageUrl: imageUrl);
+                                    docId: widget.docId,
+                                    context: context,
+                                    data: {
+                                      "title": title.text,
+                                      "description": desc.text,
+                                      "imageUrl": imageUrl,
+                                    },
+                                  );
                                 },
                               );
                               if (widget.image != null) {
-                                storage.refFromURL(widget.image!).delete();
+                                FirebaseStorage.instance.refFromURL(widget.image!).delete();
                               }
                             } else {
                               await blogService.updateBlog(
-                                  docId: widget.documentId,
-                                  context: context,
-                                  title: title.text,
-                                  description: description.text);
+                                docId: widget.docId,
+                                context: context,
+                                data: {
+                                  "title": title.text,
+                                  "description": desc.text
+                                },
+                              );
                             }
                             Navigator.pop(context);
                           } on FirebaseException catch (error) {
@@ -205,34 +209,6 @@ class _UpdatePostState extends State<UpdatePost> {
                         },
                       ),
                     ),
-                    Container(
-                      width: double.infinity,
-                      color: Colors.redAccent,
-                      child: ElevatedButton(
-                        child: Text(
-                          'Delete',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        onPressed: () async {
-                          _formKey.currentState!.save();
-
-                          try {
-                            await blogService.deleteBlog(
-                                docId: widget.documentId, context: context);
-
-                            if (widget.image != null) {
-                              storage.refFromURL(widget.image!).delete();
-                            }
-
-                            Navigator.pop(context);
-
-                            Navigator.pop(context);
-                          } on FirebaseException catch (error) {
-                            showSnack(error.message, context);
-                          }
-                        },
-                      ),
-                    )
                   ],
                 ),
               ),

@@ -10,6 +10,7 @@ import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
+  static const routeName = '/register';
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -87,14 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           text: "Login",
                           color: Colors.blueAccent,
                           function: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) {
-                                  return LoginPage();
-                                },
-                              ),
-                            );
+                            Navigator.pushNamed(context, LoginPage.routeName);
                           },
                         )
                       ],

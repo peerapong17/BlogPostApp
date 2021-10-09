@@ -1,7 +1,7 @@
 import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:blogpost/Post/components/comment_card.dart';
 import 'package:blogpost/Post/components/image_box.dart';
-import 'package:blogpost/Post/components/like_row.dart';
+import 'package:blogpost/Post/components/display_like.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/utils/sized_box.dart';
@@ -13,20 +13,19 @@ class BlogDetail extends StatefulWidget {
   final String description;
   final String image;
   final String displayName;
-  final Characters documentId;
-  final List<dynamic> comments;
+  final String docId;
   final List<dynamic> like;
-  final List<dynamic> disLike;
+  final List<dynamic> comments;
+
   BlogDetail({
     Key? key,
     required this.title,
     required this.description,
     required this.image,
     required this.displayName,
-    required this.documentId,
+    required this.docId,
     required this.comments,
     required this.like,
-    required this.disLike,
   }) : super(key: key);
 
   @override
@@ -39,6 +38,7 @@ class _BlogDetailState extends State<BlogDetail> {
   BlogService blogService = new BlogService();
   bool isLiked = false;
   int likeLength = 0;
+
   @override
   void initState() {
     super.initState();
@@ -89,23 +89,32 @@ class _BlogDetailState extends State<BlogDetail> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("By ${widget.displayName.toString()}"),
-                        likeRow(
-                          isLiked,
-                          Icons.thumb_up,
-                          likeLength,
-                          () {
+                        displayLike(
+                          isLiked: isLiked,
+                          icon: Icons.thumb_up,
+                          howManyLike: likeLength,
+                          addLike: () {
                             if (isLiked) {
+                              blogService.updateBlog(
+                                context: context,
+                                docId: widget.docId,
+                                data: {
+                                  "like": FieldValue.arrayRemove(
+                                      [authService.currentUser!.uid])
+                                },
+                              );
                               likeLength--;
                             } else {
+                              blogService.updateBlog(
+                                context: context,
+                                docId: widget.docId,
+                                data: {
+                                  "like": FieldValue.arrayUnion(
+                                      [authService.currentUser!.uid])
+                                },
+                              );
                               likeLength++;
                             }
-                            blogService.addLike(
-                                isLiked: isLiked,
-                                field: "like",
-                                uid: authService.currentUser!.uid,
-                                docId: widget.documentId,
-                                context: context);
-                            isLiked = !isLiked;
                             setState(() {});
                           },
                         ),
@@ -116,20 +125,15 @@ class _BlogDetailState extends State<BlogDetail> {
                       children: [
                         TextField(
                           controller: comment,
-                          onChanged: (String? value) {
-                            comment.text = value!;
-                          },
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: ElevatedButton(
                             onPressed: () async {
-                              await blogService.blogCollection
-                                  .doc(
-                                widget.documentId.toString(),
-                              )
-                                  .update(
-                                {
+                              blogService.updateBlog(
+                                context: context,
+                                docId: widget.docId,
+                                data: {
                                   "comments": FieldValue.arrayUnion(
                                     [
                                       {
@@ -152,12 +156,12 @@ class _BlogDetailState extends State<BlogDetail> {
                       ],
                     ),
                     ...widget.comments.map(
-                      (e) {
+                      (comment) {
                         return commentCard(
-                          name: e['username'] ?? "Anonymous",
-                          comment: e['comment'] ?? "Unknown",
+                          name: comment['username'] ?? "Anonymous",
+                          comment: comment['comment'] ?? "Unknown",
                           createdAt: timeago.format(
-                            e['createdAt'].toDate() ?? "Long time ago",
+                            comment['createdAt'].toDate() ?? "Long time ago",
                           ),
                         );
                       },

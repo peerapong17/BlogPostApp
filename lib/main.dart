@@ -1,3 +1,4 @@
+import 'package:blogpost/Authentication/screens/register_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'Authentication/screens/login_page.dart';
@@ -15,8 +16,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
+      locale: Locale.fromSubtags(languageCode: 'de'),
       theme: ThemeData.dark(),
-      home: LoginPage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => LoginPage(),
+        RegisterPage.routeName: (context) => RegisterPage(),
+      },
     );
   }
 }

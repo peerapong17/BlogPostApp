@@ -18,9 +18,12 @@ class AuthService {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      Navigator.push(context, MaterialPageRoute(builder: (_) {
-        return MainBlog();
-      }));
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainBlog(),
+          ),
+          (route) => false);
     } on FirebaseException catch (error) {
       showSnack(error.message, context);
     }
@@ -31,15 +34,12 @@ class AuthService {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) {
-            return MainBlog();
-          },
-        ),
-      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainBlog(),
+          ),
+          (route) => false);
     } on FirebaseException catch (error) {
       showSnack(error.message, context);
     }

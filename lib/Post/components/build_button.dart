@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-Container buttonToNewPost(BuildContext context) {
+Container buildButton(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(0, 0, 1, 6),
       child: FloatingActionButton(

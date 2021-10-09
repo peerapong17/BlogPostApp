@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-Padding blogCard(Map<String, dynamic> data) {
+Padding blogCard(Map<String, dynamic> data, Widget? action) {
   return Padding(
     padding: const EdgeInsets.all(12.0),
     child: Container(
@@ -17,21 +17,32 @@ Padding blogCard(Map<String, dynamic> data) {
           SizedBox(
             height: 20,
           ),
-          Container(
-            height: 200,
-            width: double.infinity,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(7),
-              child: data['imageUrl'] != null
-                  ? Image.network(
-                      data['imageUrl'],
-                      fit: BoxFit.cover,
-                    )
-                  : Image.asset(
-                      "assets/images/NoImageFound.jpg.png",
-                      fit: BoxFit.cover,
-                    ),
-            ),
+          Stack(
+            children: [
+              Container(
+                height: 200,
+                width: double.infinity,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(7),
+                  child: data['imageUrl'] != null
+                      ? Image.network(
+                          data['imageUrl'],
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          "assets/images/NoImageFound.jpg.png",
+                          fit: BoxFit.cover,
+                        ),
+                ),
+              ),
+              (() {
+                if (action != null) {
+                  return action;
+                } else {
+                  return Text("");
+                }
+              }()),
+            ],
           ),
           SizedBox(
             height: 17,

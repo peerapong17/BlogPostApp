@@ -10,6 +10,8 @@ import 'package:flutter_signin_button/button_view.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 
 class LoginPage extends StatefulWidget {
+  static const routeName = '/';
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -51,9 +53,7 @@ class _LoginPageState extends State<LoginPage> {
                           style: TextStyle(fontSize: 20),
                           decoration: inputDecoration("Email"),
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
+                        sizedBox(20),
                         TextFormField(
                           onSaved: (value) {
                             setState(() {
@@ -72,9 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () {},
                           child: Text('Forget Password?'),
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
+                        sizedBox(20),
                         reuseButton(
                           text: "Login",
                           color: Colors.blueAccent,
@@ -104,14 +102,8 @@ class _LoginPageState extends State<LoginPage> {
                           text: "Register",
                           color: Colors.greenAccent,
                           function: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) {
-                                  return RegisterPage();
-                                },
-                              ),
-                            );
+                            Navigator.pushNamed(
+                                context, RegisterPage.routeName);
                           },
                         ),
                       ],

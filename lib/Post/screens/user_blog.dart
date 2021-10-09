@@ -1,15 +1,17 @@
-import 'package:blogpost/Authentication/services/auth.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:blogpost/Post/Services/blog.dart';
 import 'package:blogpost/Post/components/app_bar.dart';
 import 'package:blogpost/Post/components/blog_card.dart';
-import 'package:blogpost/Post/components/button_to_new_post.dart';
-import 'package:blogpost/Post/models/categories.dart';
+import 'package:blogpost/Post/components/build_button.dart';
+import 'package:blogpost/Post/datas/categories.dart';
 import 'package:blogpost/Post/screens/update_blog.dart';
 import 'package:blogpost/Post/widget/main_drawer.dart';
+import 'package:blogpost/utils/show_snack.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:blogpost/Authentication/services/auth.dart';
 
 class UserBlog extends StatefulWidget {
   @override
@@ -20,6 +22,7 @@ class _UserBlogState extends State<UserBlog> {
   String blogFilteredByCategory = "";
   BlogService blogService = new BlogService();
   AuthService authService = new AuthService();
+  FirebaseStorage storage = FirebaseStorage.instance;
   String formattedDate =
       DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now());
 
@@ -28,7 +31,7 @@ class _UserBlogState extends State<UserBlog> {
     return Scaffold(
       appBar: appBar(),
       drawer: MainDrawer(),
-      floatingActionButton: buttonToNewPost(context),
+      floatingActionButton: buildButton(context),
       body: RefreshIndicator(
         onRefresh: () async {
           await Future.delayed(
@@ -101,18 +104,53 @@ class _UserBlogState extends State<UserBlog> {
                         Map<String, dynamic> data = snapshot.data!.docs[index]
                             .data() as Map<String, dynamic>;
 
+                        String docId = snapshot.data!.docs[index].id;
+
                         return GestureDetector(
-                          child: blogCard(data),
+                          child: blogCard(
+                            data,
+                            Positioned(
+                              top: 0,
+                              right: 10,
+                              child: DropdownButton<String>(
+                                icon: Icon(
+                                  Icons.more_horiz,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                                items: <String>['Remove'].map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                onChanged: (String? value) async {
+                                  try {
+                                    await blogService.deleteBlog(
+                                        docId: docId, context: context);
+
+                                    if (data['imageUrl'] != null) {
+                                      storage
+                                          .refFromURL(data['imageUrl'])
+                                          .delete();
+                                    }
+                                  } on FirebaseException catch (error) {
+                                    showSnack(error.message, context);
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
                           onTap: () {
                             Navigator.push(
                               context,
                               CupertinoPageRoute(
                                 builder: (context) => UpdatePost(
-                                    title: data['title'],
-                                    description: data['description'],
-                                    image: data['imageUrl'],
-                                    documentId: snapshot
-                                        .data!.docs[index].id.characters),
+                                  docId: docId,
+                                  title: data['title'],
+                                  description: data['description'],
+                                  image: data['imageUrl'],
+                                ),
                               ),
                             );
                           },

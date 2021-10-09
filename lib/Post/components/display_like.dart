@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-Row likeRow(
-    bool isLiked, IconData icon, int like, Function() addLike) {
+Row displayLike(
+    {required bool isLiked,
+    required IconData icon,
+    required int howManyLike,
+    required Function() addLike}) {
   return Row(
     children: [
       Row(
@@ -11,7 +14,7 @@ Row likeRow(
             onPressed: addLike,
             icon: Icon(icon, color: isLiked ? Colors.blue : Colors.white),
           ),
-          Text(like.toString()),
+          Text(howManyLike.toString()),
         ],
       ),
     ],

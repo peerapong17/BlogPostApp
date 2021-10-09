@@ -1,6 +1,6 @@
 import 'package:blogpost/Post/components/app_bar.dart';
 import 'package:blogpost/Post/components/blog_card.dart';
-import 'package:blogpost/Post/models/categories.dart';
+import 'package:blogpost/Post/datas/categories.dart';
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/Post/widget/main_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -97,7 +97,7 @@ class _MainBlogState extends State<MainBlog> {
                         Map<String, dynamic> data = snapshot.data!.docs[index]
                             .data() as Map<String, dynamic>;
                         return GestureDetector(
-                          child: blogCard(data),
+                          child: blogCard(data, null),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -109,9 +109,8 @@ class _MainBlogState extends State<MainBlog> {
                                   displayName: data['displayName'],
                                   comments: data['comments'],
                                   like: data['like'],
-                                  disLike: data['disLike'],
-                                  documentId:
-                                      snapshot.data!.docs[index].id.characters,
+                                  docId:
+                                      snapshot.data!.docs[index].id,
                                 ),
                               ),
                             );

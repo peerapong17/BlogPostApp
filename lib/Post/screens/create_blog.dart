@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:blogpost/Post/components/image_uploaded_box.dart';
-import 'package:blogpost/Post/models/categories.dart';
+import 'package:blogpost/Post/datas/categories.dart';
 import 'package:blogpost/Post/services/blog.dart';
+import 'package:blogpost/Post/services/storage.dart';
 import 'package:blogpost/utils/show_snack.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -10,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:random_string/random_string.dart';
 
 class CreateBlog extends StatefulWidget {
   @override
@@ -20,12 +20,14 @@ class CreateBlog extends StatefulWidget {
 class _CreateBlogState extends State<CreateBlog> {
   BlogService blogService = new BlogService();
   AuthService authService = new AuthService();
-  FirebaseStorage storage = FirebaseStorage.instance;
-  String downloadUrl = '';
+  Storage storageService = new Storage();
+  String desc = '';
   String title = '';
-  String description = '';
-  String _currentSelectedValue = '';
+  String downloadUrl = '';
+  String _category = '';
   File? selectedImage;
+  final _formKey = GlobalKey<FormState>();
+
 
   Future getImage() async {
     XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -35,7 +37,6 @@ class _CreateBlogState extends State<CreateBlog> {
     });
   }
 
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +115,7 @@ class _CreateBlogState extends State<CreateBlog> {
                                   "Content should be at least 20 chracters long")
                         ]),
                         onSaved: (val) {
-                          description = val!;
+                          desc = val!;
                         },
                       ),
                     ),
@@ -128,7 +129,7 @@ class _CreateBlogState extends State<CreateBlog> {
                       value: "Travel",
                       onChanged: (String? value) {
                         setState(() {
-                          _currentSelectedValue = value!;
+                          _category = value!;
                         });
                       },
                     ),
@@ -152,27 +153,30 @@ class _CreateBlogState extends State<CreateBlog> {
                             }
 
                             try {
-                              Reference ref = storage
-                                  .ref()
-                                  .child("blog")
-                                  .child("images")
-                                  .child("${randomAlphaNumeric(9)}.jpg");
-
-                              UploadTask task = ref.putFile(selectedImage!);
-
-                              task.whenComplete(
+                              storageService
+                                  .uploadImage(imageFile: selectedImage!)
+                                  .whenComplete(
                                 () async {
-                                  String imageUrl = await ref.getDownloadURL();
+                                  String imageUrl =
+                                      await storageService.ref.getDownloadURL();
+
                                   blogService.createBlog(
-                                      title: toBeginningOfSentenceCase(title)!,
-                                      description: description,
-                                      category: _currentSelectedValue,
-                                      displayName: authService
+                                    context: context,
+                                    data: {
+                                      "title":
+                                          toBeginningOfSentenceCase(title)!,
+                                      "description": desc,
+                                      "category": _category,
+                                      "displayName": authService
                                               .currentUser!.displayName ??
                                           "Anonymous",
-                                      imageUrl: imageUrl,
-                                      userId: authService.currentUser!.uid,
-                                      context: context);
+                                      "imageUrl": imageUrl,
+                                      "userId": authService.currentUser!.uid,
+                                      "like": [],
+                                      "comments": [],
+                                      "createdAt": new DateTime.now(),
+                                    },
+                                  );
 
                                   Navigator.pop(context);
                                 },
