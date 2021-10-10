@@ -1,3 +1,4 @@
+import 'package:blogpost/Post/models/blog.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -84,11 +85,11 @@ class _UserBlogState extends State<UserBlog> {
               child: StreamBuilder(
                 stream: blogFilteredByCategory == ''
                     ? blogService.blogCollection
-                        .where("userId",
+                        .where("writerId",
                             isEqualTo: authService.currentUser!.uid)
                         .snapshots()
                     : blogService.blogCollection
-                        .where("userId",
+                        .where("writerId",
                             isEqualTo: authService.currentUser!.uid)
                         .where("category", isEqualTo: blogFilteredByCategory)
                         .snapshots(),
@@ -104,7 +105,8 @@ class _UserBlogState extends State<UserBlog> {
                         Map<String, dynamic> data = snapshot.data!.docs[index]
                             .data() as Map<String, dynamic>;
 
-                        String docId = snapshot.data!.docs[index].id;
+                        Blog blog = Blog.fromJson(data);
+                        blog.id = snapshot.data!.docs[index].id;
 
                         return GestureDetector(
                           child: blogCard(
@@ -127,11 +129,11 @@ class _UserBlogState extends State<UserBlog> {
                                 onChanged: (String? value) async {
                                   try {
                                     await blogService.deleteBlog(
-                                        docId: docId, context: context);
+                                        docId: blog.id!, context: context);
 
-                                    if (data['imageUrl'] != null) {
+                                    if (blog.imageUrl != null) {
                                       storage
-                                          .refFromURL(data['imageUrl'])
+                                          .refFromURL(blog.imageUrl!)
                                           .delete();
                                     }
                                   } on FirebaseException catch (error) {
@@ -146,10 +148,7 @@ class _UserBlogState extends State<UserBlog> {
                               context,
                               CupertinoPageRoute(
                                 builder: (context) => UpdatePost(
-                                  docId: docId,
-                                  title: data['title'],
-                                  description: data['description'],
-                                  image: data['imageUrl'],
+                                  blog: blog
                                 ),
                               ),
                             );

@@ -1,6 +1,8 @@
 import 'package:blogpost/Post/components/app_bar.dart';
 import 'package:blogpost/Post/components/blog_card.dart';
 import 'package:blogpost/Post/datas/categories.dart';
+import 'package:blogpost/Post/models/blog.dart';
+import 'package:blogpost/Post/models/comment.dart';
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/Post/widget/main_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -96,6 +98,12 @@ class _MainBlogState extends State<MainBlog> {
                       itemBuilder: (context, index) {
                         Map<String, dynamic> data = snapshot.data!.docs[index]
                             .data() as Map<String, dynamic>;
+                        Blog blog = Blog.fromJson(data);
+                        blog.id = snapshot.data!.docs[index].id;
+                        // for (var i = 0; i < blog.comments.length; i++) {
+                        //   print(data['comments']);
+                        //   blog.comments.add(Comment.fromJson(data['comments']));
+                        // }
                         return GestureDetector(
                           child: blogCard(data, null),
                           onTap: () {
@@ -103,14 +111,7 @@ class _MainBlogState extends State<MainBlog> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => BlogDetail(
-                                  title: data['title'],
-                                  description: data['description'],
-                                  image: data['imageUrl'],
-                                  displayName: data['displayName'],
-                                  comments: data['comments'],
-                                  like: data['like'],
-                                  docId:
-                                      snapshot.data!.docs[index].id,
+                                  blog: blog,
                                 ),
                               ),
                             );

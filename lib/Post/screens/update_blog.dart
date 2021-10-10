@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:blogpost/Post/models/blog.dart';
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/Post/services/storage.dart';
 import 'package:blogpost/utils/show_snack.dart';
@@ -10,16 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UpdatePost extends StatefulWidget {
-  final String title;
-  final String description;
-  final String? image;
-  final String docId;
+  final Blog blog;
 
-  UpdatePost(
-      {required this.title,
-      required this.description,
-      required this.image,
-      required this.docId});
+  UpdatePost({required this.blog});
 
   @override
   _UpdatePostState createState() => _UpdatePostState();
@@ -46,14 +40,15 @@ class _UpdatePostState extends State<UpdatePost> {
   @override
   void initState() {
     super.initState();
-    title = TextEditingController(text: widget.title);
-    desc = TextEditingController(text: widget.description);
+    title = TextEditingController(text: widget.blog.title);
+    desc = TextEditingController(text: widget.blog.description);
   }
 
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+    Blog blog = widget.blog;
     return Scaffold(
       appBar: AppBar(title: Text('Update Post')),
       body: SingleChildScrollView(
@@ -81,9 +76,9 @@ class _UpdatePostState extends State<UpdatePost> {
                             selectedImage!,
                             fit: BoxFit.cover,
                           )
-                        : widget.image != null
+                        : blog.imageUrl != null
                             ? Image.network(
-                                widget.image!,
+                                blog.imageUrl!,
                                 fit: BoxFit.cover,
                               )
                             : Image.asset(
@@ -171,7 +166,6 @@ class _UpdatePostState extends State<UpdatePost> {
                             if (selectedImage != null &&
                                 title.text.trim() != '' &&
                                 desc.text.trim() != '') {
-
                               storageService
                                   .uploadImage(imageFile: selectedImage!)
                                   .whenComplete(
@@ -179,7 +173,7 @@ class _UpdatePostState extends State<UpdatePost> {
                                   String imageUrl =
                                       await storageService.ref.getDownloadURL();
                                   await blogService.updateBlog(
-                                    docId: widget.docId,
+                                    docId: blog.id!,
                                     context: context,
                                     data: {
                                       "title": title.text,
@@ -189,12 +183,14 @@ class _UpdatePostState extends State<UpdatePost> {
                                   );
                                 },
                               );
-                              if (widget.image != null) {
-                                FirebaseStorage.instance.refFromURL(widget.image!).delete();
+                              if (blog.imageUrl != null) {
+                                FirebaseStorage.instance
+                                    .refFromURL(blog.imageUrl!)
+                                    .delete();
                               }
                             } else {
                               await blogService.updateBlog(
-                                docId: widget.docId,
+                                docId: blog.id!,
                                 context: context,
                                 data: {
                                   "title": title.text,

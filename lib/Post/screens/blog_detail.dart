@@ -2,52 +2,39 @@ import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:blogpost/Post/components/comment_card.dart';
 import 'package:blogpost/Post/components/image_box.dart';
 import 'package:blogpost/Post/components/display_like.dart';
+import 'package:blogpost/Post/models/blog.dart';
+import 'package:blogpost/Post/models/comment.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/utils/sized_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class BlogDetail extends StatefulWidget {
-  final String title;
-  final String description;
-  final String image;
-  final String displayName;
-  final String docId;
-  final List<dynamic> like;
-  final List<dynamic> comments;
+  final Blog blog;
 
-  BlogDetail({
-    Key? key,
-    required this.title,
-    required this.description,
-    required this.image,
-    required this.displayName,
-    required this.docId,
-    required this.comments,
-    required this.like,
-  }) : super(key: key);
+  BlogDetail({Key? key, required this.blog}) : super(key: key);
 
   @override
   _BlogDetailState createState() => _BlogDetailState();
 }
 
 class _BlogDetailState extends State<BlogDetail> {
-  TextEditingController comment = new TextEditingController();
+  TextEditingController commentInput = new TextEditingController();
   AuthService authService = new AuthService();
   BlogService blogService = new BlogService();
   bool isLiked = false;
-  int likeLength = 0;
 
   @override
   void initState() {
     super.initState();
-    isLiked = widget.like.contains(authService.currentUser!.uid);
-    likeLength = widget.like.length;
+    isLiked = widget.blog.likes.contains(authService.currentUser!.uid);
   }
 
   @override
   Widget build(BuildContext context) {
+    Blog blog = widget.blog;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -66,7 +53,7 @@ class _BlogDetailState extends State<BlogDetail> {
         },
         child: ListView(
           children: [
-            imageBox(imageSrc: widget.image),
+            imageBox(imageSrc: blog.imageUrl!),
             sizedBox(20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 23, vertical: 20),
@@ -76,44 +63,42 @@ class _BlogDetailState extends State<BlogDetail> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.title,
+                      blog.title,
                       style: TextStyle(fontSize: 50),
                     ),
                     sizedBox(20),
                     Text(
-                      widget.description,
+                      blog.description,
                       style: TextStyle(fontSize: 20),
                     ),
                     sizedBox(40),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("By ${widget.displayName.toString()}"),
+                        Text("By ${blog.writer.toString()}"),
                         displayLike(
                           isLiked: isLiked,
                           icon: Icons.thumb_up,
-                          howManyLike: likeLength,
+                          howManyLike: blog.likeCount(),
                           addLike: () {
                             if (isLiked) {
                               blogService.updateBlog(
                                 context: context,
-                                docId: widget.docId,
+                                docId: blog.id!,
                                 data: {
-                                  "like": FieldValue.arrayRemove(
+                                  "likes": FieldValue.arrayRemove(
                                       [authService.currentUser!.uid])
                                 },
                               );
-                              likeLength--;
                             } else {
                               blogService.updateBlog(
                                 context: context,
-                                docId: widget.docId,
+                                docId: blog.id!,
                                 data: {
-                                  "like": FieldValue.arrayUnion(
+                                  "likes": FieldValue.arrayUnion(
                                       [authService.currentUser!.uid])
                                 },
                               );
-                              likeLength++;
                             }
                             setState(() {});
                           },
@@ -124,30 +109,31 @@ class _BlogDetailState extends State<BlogDetail> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         TextField(
-                          controller: comment,
+                          controller: commentInput,
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: ElevatedButton(
                             onPressed: () async {
+                              Map<String, dynamic> comment = new Comment(
+                                id: Uuid().v1(),
+                                comment: commentInput.text,
+                                userId: authService.currentUser!.uid,
+                                username:
+                                    authService.currentUser!.displayName!,
+                                createdAt: DateTime.now(),
+                              ).toJson();
+
                               blogService.updateBlog(
                                 context: context,
-                                docId: widget.docId,
+                                docId: blog.id!,
                                 data: {
                                   "comments": FieldValue.arrayUnion(
-                                    [
-                                      {
-                                        "userId": authService.currentUser!.uid,
-                                        "username": authService
-                                            .currentUser!.displayName,
-                                        "comment": comment.text,
-                                        "createdAt": DateTime.now()
-                                      }
-                                    ],
+                                    [comment],
                                   ),
                                 },
                               );
-                              comment.text = '';
+                              commentInput.text = '';
                               setState(() {});
                             },
                             child: Text("Add Comment"),
@@ -155,13 +141,13 @@ class _BlogDetailState extends State<BlogDetail> {
                         ),
                       ],
                     ),
-                    ...widget.comments.map(
+                    ...blog.comments.map(
                       (comment) {
                         return commentCard(
-                          name: comment['username'] ?? "Anonymous",
-                          comment: comment['comment'] ?? "Unknown",
+                          name: comment.username,
+                          comment: comment.comment,
                           createdAt: timeago.format(
-                            comment['createdAt'].toDate() ?? "Long time ago",
+                            comment.createdAt,
                           ),
                         );
                       },

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Container commentCard(
-    {String? name, required String comment, required String createdAt}) {
+    {required String name, required String comment, required String createdAt}) {
   return Container(
     margin: EdgeInsets.only(top: 17),
     width: double.infinity,
@@ -14,7 +14,7 @@ Container commentCard(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name ?? "Anomymous", style: TextStyle(color: Colors.white70)),
+            Text(name, style: TextStyle(color: Colors.white70)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:blogpost/Authentication/services/auth.dart';
 import 'package:blogpost/Post/components/image_uploaded_box.dart';
 import 'package:blogpost/Post/datas/categories.dart';
+import 'package:blogpost/Post/models/blog.dart';
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/Post/services/storage.dart';
 import 'package:blogpost/utils/show_snack.dart';
@@ -10,7 +11,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 
 class CreateBlog extends StatefulWidget {
   @override
@@ -28,7 +28,6 @@ class _CreateBlogState extends State<CreateBlog> {
   File? selectedImage;
   final _formKey = GlobalKey<FormState>();
 
-
   Future getImage() async {
     XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
 
@@ -36,7 +35,6 @@ class _CreateBlogState extends State<CreateBlog> {
       selectedImage = File(image!.path);
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,22 +158,23 @@ class _CreateBlogState extends State<CreateBlog> {
                                   String imageUrl =
                                       await storageService.ref.getDownloadURL();
 
+                                  Map<String, dynamic> blog = Blog(
+                                    title: title,
+                                    description: desc,
+                                    category: _category,
+                                    writer:
+                                        authService.currentUser!.displayName ??
+                                            "Anonymous",
+                                    imageUrl: imageUrl,
+                                    writerId: authService.currentUser!.uid,
+                                    likes: [],
+                                    comments: [],
+                                    createdAt: new DateTime.now(),
+                                  ).toJson();
+
                                   blogService.createBlog(
                                     context: context,
-                                    data: {
-                                      "title":
-                                          toBeginningOfSentenceCase(title)!,
-                                      "description": desc,
-                                      "category": _category,
-                                      "displayName": authService
-                                              .currentUser!.displayName ??
-                                          "Anonymous",
-                                      "imageUrl": imageUrl,
-                                      "userId": authService.currentUser!.uid,
-                                      "like": [],
-                                      "comments": [],
-                                      "createdAt": new DateTime.now(),
-                                    },
+                                    data: blog,
                                   );
 
                                   Navigator.pop(context);
