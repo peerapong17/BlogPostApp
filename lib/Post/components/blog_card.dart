@@ -1,7 +1,8 @@
+import 'package:blogpost/Post/models/blog.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-Padding blogCard(Map<String, dynamic> data, Widget? action) {
+Padding blogCard(Blog blog, Widget? action) {
   return Padding(
     padding: const EdgeInsets.all(12.0),
     child: Container(
@@ -24,9 +25,9 @@ Padding blogCard(Map<String, dynamic> data, Widget? action) {
                 width: double.infinity,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(7),
-                  child: data['imageUrl'] != null
+                  child: blog.imageUrl != null
                       ? Image.network(
-                          data['imageUrl'],
+                          blog.imageUrl!,
                           fit: BoxFit.cover,
                         )
                       : Image.asset(
@@ -54,15 +55,11 @@ Padding blogCard(Map<String, dynamic> data, Widget? action) {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    data['title'] != null ? data['title'] : "No title",
+                    blog.title,
                     style: TextStyle(fontSize: 25),
                   ),
                   Text(
-                    data['createdAt'] != null
-                        ? timeago.format(
-                            data['createdAt'].toDate(),
-                          )
-                        : "No data",
+                    timeago.format(blog.createdAt),
                     style: TextStyle(color: Colors.white60),
                   ),
                 ],
@@ -71,11 +68,11 @@ Padding blogCard(Map<String, dynamic> data, Widget? action) {
                 height: 13,
               ),
               Text(
-                data['description'] != null
-                    ? data['description'].substring(0, 40)
-                    : "No description",
+                blog.description.substring(0, 40),
                 style: TextStyle(
-                    fontSize: 17, color: Colors.white.withOpacity(0.6)),
+                  fontSize: 17,
+                  color: Colors.white.withOpacity(0.6),
+                ),
               ),
             ],
           ),

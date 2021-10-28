@@ -24,8 +24,8 @@ class _UserBlogState extends State<UserBlog> {
   BlogService blogService = new BlogService();
   AuthService authService = new AuthService();
   FirebaseStorage storage = FirebaseStorage.instance;
-  String formattedDate =
-      DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now());
+  // String formattedDate =
+  //     DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
@@ -109,8 +109,18 @@ class _UserBlogState extends State<UserBlog> {
                         blog.id = snapshot.data!.docs[index].id;
 
                         return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => UpdatePost(
+                                  blog: blog
+                                ),
+                              ),
+                            );
+                          },
                           child: blogCard(
-                            data,
+                            blog,
                             Positioned(
                               top: 0,
                               right: 10,
@@ -143,16 +153,6 @@ class _UserBlogState extends State<UserBlog> {
                               ),
                             ),
                           ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => UpdatePost(
-                                  blog: blog
-                                ),
-                              ),
-                            );
-                          },
                         );
                       },
                     );

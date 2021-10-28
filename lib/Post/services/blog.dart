@@ -6,6 +6,16 @@ class BlogService {
   CollectionReference blogCollection =
       FirebaseFirestore.instance.collection('blogs');
 
+  Stream<QuerySnapshot> fetchData(String filter) {
+    return filter == ''
+        ? blogCollection
+            .orderBy("createdAt", descending: true)
+            .snapshots()
+        : blogCollection
+            .where("category", isEqualTo: filter)
+            .snapshots();
+  }
+
   Future<void> createBlog(
       {required BuildContext context,
       required Map<String, dynamic> data}) async {

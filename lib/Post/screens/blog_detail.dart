@@ -79,7 +79,7 @@ class _BlogDetailState extends State<BlogDetail> {
                         displayLike(
                           isLiked: isLiked,
                           icon: Icons.thumb_up,
-                          howManyLike: blog.likeCount(),
+                          likeCount: blog.likeCount(),
                           addLike: () {
                             if (isLiked) {
                               blogService.updateBlog(
@@ -114,13 +114,13 @@ class _BlogDetailState extends State<BlogDetail> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: ElevatedButton(
+                            child: Text("Add Comment"),
                             onPressed: () async {
                               Map<String, dynamic> comment = new Comment(
                                 id: Uuid().v1(),
                                 comment: commentInput.text,
                                 userId: authService.currentUser!.uid,
-                                username:
-                                    authService.currentUser!.displayName!,
+                                username: authService.currentUser!.displayName!,
                                 createdAt: DateTime.now(),
                               ).toJson();
 
@@ -133,10 +133,8 @@ class _BlogDetailState extends State<BlogDetail> {
                                   ),
                                 },
                               );
-                              commentInput.text = '';
-                              setState(() {});
+                              commentInput.clear();
                             },
-                            child: Text("Add Comment"),
                           ),
                         ),
                       ],

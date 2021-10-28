@@ -1,8 +1,8 @@
 import 'package:blogpost/Post/components/app_bar.dart';
 import 'package:blogpost/Post/components/blog_card.dart';
+import 'package:blogpost/Post/components/category_list.dart';
 import 'package:blogpost/Post/datas/categories.dart';
 import 'package:blogpost/Post/models/blog.dart';
-import 'package:blogpost/Post/models/comment.dart';
 import 'package:blogpost/Post/services/blog.dart';
 import 'package:blogpost/Post/widget/main_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,19 +17,9 @@ class MainBlog extends StatefulWidget {
 }
 
 class _MainBlogState extends State<MainBlog> {
-  String blogFilteredByCategory = '';
+  String blogSortedByCategory = '';
   BlogService blogService = new BlogService();
   String formattedDate = DateFormat('kk:mm').format(DateTime.now());
-
-  Stream<QuerySnapshot> fetchData(String filter) {
-    return filter == ''
-        ? blogService.blogCollection
-            .orderBy("createdAt", descending: true)
-            .snapshots()
-        : blogService.blogCollection
-            .where("category", isEqualTo: filter)
-            .snapshots();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +31,7 @@ class _MainBlogState extends State<MainBlog> {
           await Future.delayed(
             Duration(seconds: 3),
           );
-          fetchData(blogFilteredByCategory);
+          blogService.fetchData(blogSortedByCategory);
         },
         child: Column(
           children: [
@@ -54,39 +44,25 @@ class _MainBlogState extends State<MainBlog> {
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
+                    child: categoryList(categories[index]),
                     onTap: () {
                       if (categories[index] != "All") {
                         setState(() {
-                          blogFilteredByCategory = categories[index];
+                          blogSortedByCategory = categories[index];
                         });
                       } else {
                         setState(() {
-                          blogFilteredByCategory = "";
+                          blogSortedByCategory = "";
                         });
                       }
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Card(
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(7),
-                              color: Colors.blue),
-                          padding: EdgeInsets.all(10),
-                          child: Text(
-                            categories[index],
-                            style: TextStyle(fontSize: 17),
-                          ),
-                        ),
-                      ),
-                    ),
                   );
                 },
               ),
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: fetchData(blogFilteredByCategory),
+                stream: blogService.fetchData(blogSortedByCategory),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (!snapshot.hasData) {
                     return Center(
@@ -105,7 +81,7 @@ class _MainBlogState extends State<MainBlog> {
                         //   blog.comments.add(Comment.fromJson(data['comments']));
                         // }
                         return GestureDetector(
-                          child: blogCard(data, null),
+                          child: blogCard(blog, null),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -128,4 +104,6 @@ class _MainBlogState extends State<MainBlog> {
       ),
     );
   }
+
+  
 }

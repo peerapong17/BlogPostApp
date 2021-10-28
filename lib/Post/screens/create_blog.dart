@@ -21,9 +21,8 @@ class _CreateBlogState extends State<CreateBlog> {
   BlogService blogService = new BlogService();
   AuthService authService = new AuthService();
   Storage storageService = new Storage();
-  String desc = '';
-  String title = '';
-  String downloadUrl = '';
+  TextEditingController desc = TextEditingController();
+  TextEditingController title = TextEditingController();
   String _category = '';
   File? selectedImage;
   final _formKey = GlobalKey<FormState>();
@@ -31,9 +30,11 @@ class _CreateBlogState extends State<CreateBlog> {
   Future getImage() async {
     XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      selectedImage = File(image!.path);
-    });
+    if (image != null) {
+      setState(() {
+        selectedImage = File(image.path);
+      });
+    }
   }
 
   @override
@@ -66,6 +67,7 @@ class _CreateBlogState extends State<CreateBlog> {
                           color: Color(0xff212121),
                           borderRadius: BorderRadius.circular(20)),
                       child: TextFormField(
+                        controller: title,
                         style: TextStyle(
                           fontSize: 25.0,
                         ),
@@ -83,9 +85,6 @@ class _CreateBlogState extends State<CreateBlog> {
                               errorText:
                                   "Title should be at least 6 characters long")
                         ]),
-                        onSaved: (val) {
-                          title = val!;
-                        },
                       ),
                     ),
                     sizedBox(20),
@@ -95,6 +94,7 @@ class _CreateBlogState extends State<CreateBlog> {
                           color: Color(0xff212121),
                           borderRadius: BorderRadius.circular(20)),
                       child: TextFormField(
+                        controller: desc,
                         style: TextStyle(
                           fontSize: 25.0,
                         ),
@@ -112,9 +112,6 @@ class _CreateBlogState extends State<CreateBlog> {
                               errorText:
                                   "Content should be at least 20 chracters long")
                         ]),
-                        onSaved: (val) {
-                          desc = val!;
-                        },
                       ),
                     ),
                     DropdownButton<String>(
@@ -141,8 +138,6 @@ class _CreateBlogState extends State<CreateBlog> {
                         ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
-
                             if (selectedImage == null) {
                               showSnack(
                                   "Image is not provided, please choose some",
@@ -159,8 +154,8 @@ class _CreateBlogState extends State<CreateBlog> {
                                       await storageService.ref.getDownloadURL();
 
                                   Map<String, dynamic> blog = Blog(
-                                    title: title,
-                                    description: desc,
+                                    title: title.text,
+                                    description: desc.text,
                                     category: _category,
                                     writer:
                                         authService.currentUser!.displayName ??
