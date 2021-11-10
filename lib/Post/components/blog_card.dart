@@ -68,7 +68,7 @@ Padding blogCard(Blog blog, Widget? action) {
                 height: 13,
               ),
               Text(
-                blog.description.substring(0, 40),
+                blog.description.substring(0, 20),
                 style: TextStyle(
                   fontSize: 17,
                   color: Colors.white.withOpacity(0.6),

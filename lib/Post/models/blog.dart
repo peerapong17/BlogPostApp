@@ -26,16 +26,16 @@ class Blog {
   DateTime createdAt;
 
   factory Blog.fromJson(Map<String, dynamic> json) => Blog(
-        title: json["title"],
-        description: json["description"],
-        category: json["category"],
-        writer: json["writer"],
-        imageUrl: json["imageUrl"],
-        writerId: json["writerId"],
+        title: json["title"]??"",
+        description: json["description"]??"",
+        category: json["category"]??"",
+        writer: json["writer"]??"",
+        imageUrl: json["imageUrl"]??"",
+        writerId: json["writerId"]??"",
         likes: List<String>.from(json["likes"].map((x) => x)),
         comments: List<Comment>.from(
             json["comments"].map((x) => Comment.fromJson(x))),
-        createdAt: json["createdAt"].toDate(),
+        createdAt: json["createdAt"].toDate()??new DateTime.now(),
       );
 
   Map<String, dynamic> toJson() => {

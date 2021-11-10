@@ -6,14 +6,14 @@ class BlogService {
   CollectionReference blogCollection =
       FirebaseFirestore.instance.collection('blogs');
 
-  Stream<QuerySnapshot> fetchData(String filter) {
+  Stream<QuerySnapshot> fetchBlogs(String filter) {
     return filter == ''
-        ? blogCollection
-            .orderBy("createdAt", descending: true)
-            .snapshots()
-        : blogCollection
-            .where("category", isEqualTo: filter)
-            .snapshots();
+        ? blogCollection.orderBy("createdAt", descending: true).snapshots()
+        : blogCollection.where("category", isEqualTo: filter).snapshots();
+  }
+
+  Stream<DocumentSnapshot> fetchBlog(String id) {
+    return blogCollection.doc(id).snapshots();
   }
 
   Future<void> createBlog(

@@ -31,7 +31,7 @@ class _MainBlogState extends State<MainBlog> {
           await Future.delayed(
             Duration(seconds: 3),
           );
-          blogService.fetchData(blogSortedByCategory);
+          blogService.fetchBlogs(blogSortedByCategory);
         },
         child: Column(
           children: [
@@ -62,8 +62,9 @@ class _MainBlogState extends State<MainBlog> {
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: blogService.fetchData(blogSortedByCategory),
+                stream: blogService.fetchBlogs(blogSortedByCategory),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  print("snapshot change");
                   if (!snapshot.hasData) {
                     return Center(
                       child: CircularProgressIndicator(),
@@ -72,14 +73,22 @@ class _MainBlogState extends State<MainBlog> {
                     return ListView.builder(
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
+                        if (snapshot.hasError) {
+                          return Text('Something went wrong');
+                        }
+
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
                         Map<String, dynamic> data = snapshot.data!.docs[index]
                             .data() as Map<String, dynamic>;
                         Blog blog = Blog.fromJson(data);
                         blog.id = snapshot.data!.docs[index].id;
-                        // for (var i = 0; i < blog.comments.length; i++) {
-                        //   print(data['comments']);
-                        //   blog.comments.add(Comment.fromJson(data['comments']));
-                        // }
+
                         return GestureDetector(
                           child: blogCard(blog, null),
                           onTap: () {
@@ -87,7 +96,7 @@ class _MainBlogState extends State<MainBlog> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => BlogDetail(
-                                  blog: blog,
+                                  blogId: snapshot.data!.docs[index].id,
                                 ),
                               ),
                             );
@@ -104,6 +113,4 @@ class _MainBlogState extends State<MainBlog> {
       ),
     );
   }
-
-  
 }
